@@ -4,6 +4,11 @@ import os
 import json
 from typing import Dict, Any
 
+DEFAULT_CONFIG_PATH= os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), 
+    'default_config.json'
+)
+
 class Config:
     """Centralized configuration management with environment and file overrides."""
     
@@ -24,11 +29,7 @@ class Config:
     
     def _load_default_config(self):
         """Load the default configuration from the default_config.json file."""
-        default_config_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 
-            'default_config.json'
-        )
-        
+        default_config_path = DEFAULT_CONFIG_PATH        
         try:
             with open(default_config_path, 'r') as f:
                 return json.load(f)
@@ -245,6 +246,11 @@ class Config:
         with open(filepath, 'w') as f:
             json.dump(self.config, f, indent=2)
         print(f"Configuration saved to {filepath}")
+
+    def reload(self) -> None:
+        """Reload the configuration from the default file and environment."""
+        self._initialize()
+        print("Configuration reloaded from defaults and environment.")
 
 # Create global configuration instance
 config = Config()

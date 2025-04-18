@@ -43,6 +43,7 @@ class MCPClient:
         _timeout = timeout or TIMEOUT
         # TODO questionable if we need to keep both config system and init params system
         self.server_name = None
+        self._is_connected = False  # Track connection status
 
         # Initialize log level
         logger.setLevel(LOGGING_LEVEL)
@@ -103,6 +104,32 @@ class MCPClient:
             init_result = await self.session.initialize()
             self.server_name = init_result.serverInfo.name
 
+            # If the server reports a generic "cli" name, try to get a better name from the script path
+            if self.server_name == "cli":
+                try:
+                    # First attempt to extract SERVER_NAME from the script file
+                    with open(server_script_path, 'r') as f:
+                        for line in f:
+                            line = line.strip()
+                            if line.startswith('SERVER_NAME ='):
+                                extracted_name = line.split('=', 1)[1].strip().strip('"\'')
+                                if extracted_name:
+                                    self.server_name = extracted_name
+                                    logger.debug(f"Extracted server name from script: {self.server_name}")
+                                    break
+                    
+                    # If we couldn't find SERVER_NAME, fall back to the script name
+                    if self.server_name == "cli":
+                        # Extract the name from the script path (e.g., wifi_server.py -> WiFi)
+                        script_name = os.path.basename(server_script_path)
+                        if script_name.endswith('_server.py'):
+                            script_name = script_name[:-10]  # Remove "_server.py"
+                        self.server_name = script_name.replace('_', ' ').title()
+                        logger.debug(f"Using script name as server name: {self.server_name}")
+                except Exception as name_error:
+                    logger.warning(f"Failed to extract server name from script: {name_error}")
+                    # Keep the original server name if extraction failed
+
             end_time = time.time()
             logger.debug(f"Server connection completed in {end_time - start_time:.2f}s")
 
@@ -139,6 +166,9 @@ class MCPClient:
             # enable cache restore if provider is llama-cpp
             if self.llm_provider.provider_type == "llama-cpp":
                 await self.llm_provider.restore_cache(self.message_processor.get_formatted_messages(), self.available_tools)
+
+            # Set the connection status to True
+            self._is_connected = True
             return True
 
         except Exception as e:
