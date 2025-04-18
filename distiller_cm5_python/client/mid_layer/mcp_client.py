@@ -229,6 +229,10 @@ class MCPClient:
             # Use streaming for the first call if globally enabled, otherwise non-streaming.
             use_stream_this_call = self.streaming and current_iteration == 1
 
+            # Signal new response beginning for any iteration after the first
+            if current_iteration > 1:
+                yield "__NEW_RESPONSE_AFTER_TOOL_CALLS__"
+
             full_response_content = ""
             accumulated_tool_calls = []
 
