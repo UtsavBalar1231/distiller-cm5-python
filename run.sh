@@ -26,7 +26,7 @@ fi
 
 # Run the main Python script
 echo "Running main.py..."
-python main.py
+python main.py "$@"
 
 # Deactivate the virtual environment (optional, runs when script exits)
 # deactivate 
