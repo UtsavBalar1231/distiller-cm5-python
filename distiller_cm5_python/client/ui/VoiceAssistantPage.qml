@@ -16,6 +16,7 @@ PageBase {
     property string statusText: "Ready"
     property string inputBuffer: ""
     property var focusableItems: []
+    property var previousFocusedItem: null
 
     signal selectNewServer()
 
@@ -63,6 +64,29 @@ PageBase {
         FocusManager.initializeFocusItems(focusableItems, conversationView)
     }
     
+    // Function to ensure input area buttons are focused if nothing else is
+    function ensureFocusableItemsHaveFocus() {
+        console.log("Ensuring something has focus");
+        // If no focus or focus index is -1, reset focus to input area
+        if (FocusManager.currentFocusIndex < 0 || FocusManager.currentFocusItems.length === 0) {
+            console.log("Focus needs to be reset");
+            // Re-collect focus items to ensure they're registered
+            collectFocusItems();
+            
+            // Set focus to one of the input buttons
+            if (inputArea && inputArea.voiceButton && inputArea.voiceButton.navigable) {
+                console.log("Setting focus to voice button");
+                FocusManager.setFocusToItem(inputArea.voiceButton);
+            } else if (inputArea && inputArea.settingsButton && inputArea.settingsButton.navigable) {
+                console.log("Setting focus to settings button");
+                FocusManager.setFocusToItem(inputArea.settingsButton);
+            } else if (focusableItems.length > 0) {
+                console.log("Setting focus to first item in list");
+                FocusManager.setFocusToItem(focusableItems[0]);
+            }
+        }
+    }
+
     Component.onCompleted: {
         // Collect focusable items after component is fully loaded
         console.log("VoiceAssistantPage completed, scheduling focus collection");
@@ -78,6 +102,11 @@ PageBase {
         onTriggered: {
             console.log("Focus init timer triggered");
             collectFocusItems();
+            
+            // Set initial focus to voice button
+            if (inputArea && inputArea.voiceButton && inputArea.voiceButton.navigable) {
+                FocusManager.setFocusToItem(inputArea.voiceButton);
+            }
         }
     }
 
@@ -106,6 +135,8 @@ PageBase {
         isConnected: bridge && bridge.ready ? bridge.isConnected : false
         
         onServerSelectClicked: {
+            // Store the currently focused item before showing dialog
+            previousFocusedItem = FocusManager.currentFocusItems[FocusManager.currentFocusIndex];
             confirmServerChangeDialog.open();
         }
     }
@@ -134,6 +165,19 @@ PageBase {
             }
             // Go back to server selection
             voiceAssistantPage.selectNewServer();
+        }
+        
+        onRejected: {
+            // Restore focus to the previously focused item when canceling
+            restoreFocusTimer.start();
+        }
+        
+        // Handle dialog closure
+        onClosed: {
+            // If dialog is rejected (Cancel pressed), restore focus
+            if (!visible && !accepted) {
+                restoreFocusTimer.start();
+            }
         }
     }
 
@@ -281,6 +325,8 @@ PageBase {
         running: false
         
         onTriggered: {
+            // Save the current focus before showing dialog
+            previousFocusedItem = FocusManager.currentFocusItems[FocusManager.currentFocusIndex];
             // Show reconnection dialog
             confirmServerChangeDialog.open();
         }
@@ -297,6 +343,59 @@ PageBase {
         onTriggered: {
             // Turn off response in progress mode
             conversationView.setResponseInProgress(false);
+        }
+    }
+
+    // Timer to restore focus after dialog is closed
+    Timer {
+        id: restoreFocusTimer
+        interval: 100
+        repeat: false
+        running: false
+        
+        onTriggered: {
+            console.log("Restore focus timer triggered");
+            // First make sure focus items are properly initialized
+            collectFocusItems();
+            
+            // Log the state for debugging
+            console.log("Current focus index: " + FocusManager.currentFocusIndex);
+            console.log("Focusable items count: " + focusableItems.length);
+            console.log("Has previous focus item: " + (previousFocusedItem !== null));
+            
+            // Then try to restore focus to the previous item or a default item
+            if (previousFocusedItem && previousFocusedItem.navigable) {
+                console.log("Restoring focus to previous item");
+                FocusManager.setFocusToItem(previousFocusedItem);
+            } else if (inputArea && inputArea.voiceButton && inputArea.voiceButton.navigable) {
+                console.log("Setting focus to voice button");
+                FocusManager.setFocusToItem(inputArea.voiceButton);
+            } else if (focusableItems.length > 0) {
+                console.log("Setting focus to first non-header button");
+                // Default to the first button that's not the header button
+                for (var i = 0; i < focusableItems.length; i++) {
+                    if (focusableItems[i] !== header.serverSelectButton) {
+                        FocusManager.setFocusToItem(focusableItems[i]);
+                        break;
+                    }
+                }
+            } else {
+                console.error("No focusable items available to restore focus");
+            }
+            
+            // Double-check that something has focus
+            focusCheckTimer.start();
+        }
+    }
+    
+    // Timer to verify focus state after initial restoration
+    Timer {
+        id: focusCheckTimer
+        interval: 200
+        repeat: false
+        running: false
+        onTriggered: {
+            ensureFocusableItemsHaveFocus();
         }
     }
 }
