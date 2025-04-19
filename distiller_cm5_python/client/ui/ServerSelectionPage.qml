@@ -294,13 +294,17 @@ PageBase {
                 font.family: FontManager.primaryFontFamily
                 color: ThemeManager.secondaryTextColor
                 horizontalAlignment: Text.AlignCenter
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
             }
             
             // Refresh button (converted to AppButton)
             AppButton {
                 id: refreshButton
-                text: "Refresh Server List"
-                Layout.preferredWidth: Math.min(parent.width, 200)
+                text: "Refresh"
+                Layout.preferredWidth: Math.min(parent.width * 0.5, 180)
+                Layout.preferredHeight: Math.min(parent.height * 0.4, 60)
                 Layout.alignment: Qt.AlignHCenter
                 navigable: true
                 
