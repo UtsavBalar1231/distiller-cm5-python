@@ -16,7 +16,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import the main function from the actual CLI entry point
-from distiller_cm5_python.client.cli import main as cli_main
+from distiller_cm5_python.client.cli import main as cli_main, parse_arguments
 from distiller_cm5_python.utils.logger import logger # Keep logger for potential top-level errors
 from distiller_cm5_python.utils.distiller_exception import UserVisibleError
 # Import necessary components for LLM server management
@@ -30,6 +30,15 @@ async def main():
     started_server = False
     
     try:
+        # Parse arguments and check for GUI flag before proceeding
+        args = parse_arguments()
+        if hasattr(args, 'gui') and args.gui:
+            logger.info("Starting GUI mode...")
+            # Import the GUI app and run it
+            from distiller_cm5_python.client.ui.App import App
+            app = App()
+            return await app.run()
+        
         # --- Llama.cpp Server Management ---
         if PROVIDER_TYPE == "llama-cpp":
             logger.info("Configuration specifies llama-cpp provider. Checking server status...")

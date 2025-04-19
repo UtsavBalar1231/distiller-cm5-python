@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# Function to show usage
+show_usage() {
+    echo "Usage: ./run.sh [options]"
+    echo "Options:"
+    echo "  --gui    Launch the GUI interface instead of CLI"
+    echo "  -h, --help    Display this help message"
+    echo ""
+    echo "All other options are passed directly to main.py"
+}
+
+# Check for help flag
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+    show_usage
+    exit 0
+fi
+
 # Check if the .venv directory exists
 if [ ! -d ".venv" ]; then
   echo "Virtual environment not found. Installing dependencies..."

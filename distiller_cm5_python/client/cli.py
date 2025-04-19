@@ -146,6 +146,7 @@ def parse_arguments():
     parser.add_argument("--timeout", type=int, default=TIMEOUT, help="Request timeout in seconds")
     parser.add_argument("--log-level", default=LOGGING_LEVEL, choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], help="Set logging level")
     parser.add_argument("--disable-audio", action="store_true", help="Disable audio input features (requires distiller_cm5_sdk)")
+    parser.add_argument("--gui", action="store_true", help="Launch the GUI interface instead of CLI")
     return parser.parse_args()
 
 async def main():
