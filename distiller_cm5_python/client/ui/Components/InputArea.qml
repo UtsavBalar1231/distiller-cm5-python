@@ -185,57 +185,81 @@ Rectangle {
             id: buttonRow
 
             Layout.fillWidth: true
-            Layout.preferredHeight: 36
+            Layout.preferredHeight: 40
+
+            // Consistent button size
+            property int buttonSize: 40
+            property int borderWidth: 2
 
             Row {
                 id: leftButtonsRow
 
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 8
+                spacing: 12
 
                 // Settings button
                 RoundButton {
                     id: settingsButton
 
-                    width: 36
-                    height: 36
+                    width: buttonRow.buttonSize
+                    height: buttonRow.buttonSize
                     flat: true
                     property bool navigable: true
                     property bool isActiveItem: false
                     onClicked: inputArea.settingsClicked()
 
                     background: Rectangle {
-                        color: parent.isActiveItem ? ThemeManager.accentColor : (parent.pressed ? ThemeManager.pressedColor : "transparent")
-                        opacity: parent.isActiveItem ? 0.2 : 1.0
-                        border.width: parent.isActiveItem ? 1 : 0
-                        border.color: ThemeManager.accentColor
-                        radius: width / 2
-                    }
-
-                    contentItem: Text {
-                        text: "⚙"  // Gear icon as text
-                        font: FontManager.heading
-                        color: ThemeManager.textColor
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        opacity: settingsButton.isActiveItem ? 1.0 : (settingsButton.hovered ? 1 : 0.7)
-
-                        Behavior on opacity {
-                            NumberAnimation {
-                                duration: 150
+                        color: "transparent"
+                        antialiasing: true
+                        
+                        // Crisp focus border
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: settingsButton.isActiveItem ? 0 : -buttonRow.borderWidth
+                            color: "transparent"
+                            border {
+                                width: settingsButton.isActiveItem ? buttonRow.borderWidth : 0
+                                color: ThemeManager.accentColor
                             }
+                            radius: width / 2
+                            antialiasing: true
+                            opacity: settingsButton.isActiveItem ? 1.0 : 0
                         }
                     }
 
+                    contentItem: Item {
+                        anchors.fill: parent
+                        
+                        // Simple hover highlight
+                        Rectangle {
+                            visible: settingsButton.hovered || settingsButton.pressed
+                            anchors.fill: parent
+                            radius: width / 2
+                            color: ThemeManager.buttonColor
+                            opacity: 0.15
+                            antialiasing: true
+                        }
+
+                        Text {
+                            text: "⚙"  // Gear icon as text
+                            font.pixelSize: parent.width / 2
+                            font.family: FontManager.primaryFontFamily
+                            color: ThemeManager.textColor
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            anchors.centerIn: parent
+                            opacity: settingsButton.isActiveItem ? 1.0 : (settingsButton.hovered ? 1 : 0.7)
+                        }
+                    }
                 }
 
                 // Voice button
                 RoundButton {
                     id: voiceButton
 
-                    width: 36
-                    height: 36
+                    width: buttonRow.buttonSize
+                    height: buttonRow.buttonSize
                     flat: true
                     checkable: true
                     property bool navigable: true
@@ -246,19 +270,39 @@ Rectangle {
                     }
 
                     background: Rectangle {
-                        color: parent.isActiveItem ? ThemeManager.accentColor : (parent.checked ? ThemeManager.subtleColor : "transparent")
-                        opacity: parent.isActiveItem ? 0.2 : 1.0
-                        border.width: parent.isActiveItem ? 1 : 0
-                        border.color: ThemeManager.accentColor
-                        radius: width / 2
+                        color: voiceButton.checked ? ThemeManager.subtleColor : "transparent"
+                        antialiasing: true
+                        
+                        // Crisp focus border
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: voiceButton.isActiveItem ? 0 : -buttonRow.borderWidth
+                            color: "transparent"
+                            border {
+                                width: voiceButton.isActiveItem ? buttonRow.borderWidth : 0
+                                color: ThemeManager.accentColor
+                            }
+                            radius: width / 2
+                            antialiasing: true
+                            opacity: voiceButton.isActiveItem ? 1.0 : 0
+                        }
                     }
 
                     contentItem: Item {
                         anchors.fill: parent
+                        
+                        // Simple hover highlight
+                        Rectangle {
+                            visible: voiceButton.hovered || voiceButton.pressed
+                            anchors.fill: parent
+                            radius: width / 2
+                            color: ThemeManager.buttonColor
+                            opacity: 0.15
+                            antialiasing: true
+                        }
 
                         OptimizedImage {
                             id: micIcon
-
                             source: {
                                 if (!voiceButton.enabled)
                                     return ThemeManager.darkMode ? "../images/icons/dark/microphone-empty.svg" : "../images/icons/microphone-empty.svg";
@@ -271,90 +315,32 @@ Rectangle {
                                 }
                                 return ThemeManager.darkMode ? "../images/icons/dark/microphone-empty.svg" : "../images/icons/microphone-empty.svg";
                             }
-                            sourceSize.width: 20
-                            sourceSize.height: 20
-                            width: 20
-                            height: 20
+                            sourceSize.width: 22
+                            sourceSize.height: 22
+                            width: 22
+                            height: 22
                             anchors.centerIn: parent
                             fillMode: Image.PreserveAspectFit
                             opacity: voiceButton.checked ? 1 : (voiceButton.hovered ? 0.9 : 0.7)
-                            fadeInDuration: 150
+                            fadeInDuration: 0
                             showPlaceholder: false
-
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: 150
-                                }
-                            }
                         }
 
-                        // Subtle pulse animation for listening state
+                        // Simple indicator for listening state
                         Rectangle {
                             visible: voiceButton.checked && !inputArea.isProcessing
                             anchors.centerIn: parent
-                            width: parent.width
-                            height: parent.height
+                            width: parent.width - 4
+                            height: parent.height - 4
                             radius: width / 2
-                            color: ThemeManager.subtleColor
-                            scale: pulseAnimation.running ? 1 : 0.8
-                            opacity: pulseAnimation.running ? 0.3 : 0
-
-                            SequentialAnimation {
-                                id: pulseAnimation
-
-                                loops: Animation.Infinite
-                                running: voiceButton.checked && !inputArea.isProcessing
-
-                                ParallelAnimation {
-                                    NumberAnimation {
-                                        target: micIcon
-                                        property: "opacity"
-                                        from: 0.8
-                                        to: 1
-                                        duration: 1000
-                                        easing.type: Easing.InOutQuad
-                                    }
-
-                                    NumberAnimation {
-                                        target: micIcon.parent
-                                        property: "scale"
-                                        from: 0.95
-                                        to: 1.05
-                                        duration: 1000
-                                        easing.type: Easing.InOutQuad
-                                    }
-
-                                }
-
-                                ParallelAnimation {
-                                    NumberAnimation {
-                                        target: micIcon
-                                        property: "opacity"
-                                        from: 1
-                                        to: 0.8
-                                        duration: 1000
-                                        easing.type: Easing.InOutQuad
-                                    }
-
-                                    NumberAnimation {
-                                        target: micIcon.parent
-                                        property: "scale"
-                                        from: 1.05
-                                        to: 0.95
-                                        duration: 1000
-                                        easing.type: Easing.InOutQuad
-                                    }
-
-                                }
-
-                            }
-
+                            color: "transparent"
+                            border.width: 1
+                            border.color: ThemeManager.accentColor
+                            opacity: 0.5
+                            antialiasing: true
                         }
-
                     }
-
                 }
-
             }
 
             // Send button
@@ -363,8 +349,8 @@ Rectangle {
 
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                width: 36
-                height: 36
+                width: buttonRow.buttonSize
+                height: buttonRow.buttonSize
                 flat: true
                 property bool navigable: true
                 property bool isActiveItem: false
@@ -377,11 +363,22 @@ Rectangle {
                 }
 
                 background: Rectangle {
-                    color: !parent.enabled ? "transparent" : (parent.isActiveItem ? ThemeManager.accentColor : (parent.pressed ? ThemeManager.pressedColor : "transparent"))
-                    opacity: parent.isActiveItem ? 0.2 : 1.0
-                    border.width: parent.isActiveItem ? 1 : 0
-                    border.color: ThemeManager.accentColor
-                    radius: width / 2
+                    color: "transparent"
+                    antialiasing: true
+                    
+                    // Crisp focus border
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.margins: sendButton.isActiveItem ? 0 : -buttonRow.borderWidth
+                        color: "transparent"
+                        border {
+                            width: sendButton.isActiveItem ? buttonRow.borderWidth : 0
+                            color: ThemeManager.accentColor
+                        }
+                        radius: width / 2
+                        antialiasing: true
+                        opacity: sendButton.isActiveItem ? 1.0 : 0
+                    }
                 }
 
                 contentItem: Item {
@@ -393,31 +390,23 @@ Rectangle {
                         radius: width / 2
                         color: ThemeManager.buttonColor
                         opacity: 0.15
+                        antialiasing: true
                     }
 
                     OptimizedImage {
                         source: ThemeManager.darkMode ? "../images/icons/dark/arrow_right.svg" : "../images/icons/arrow_right.svg"
-                        sourceSize.width: 20
-                        sourceSize.height: 20
-                        width: 20
-                        height: 20
+                        sourceSize.width: 22
+                        sourceSize.height: 22
+                        width: 22
+                        height: 22
                         anchors.centerIn: parent
                         fillMode: Image.PreserveAspectFit
                         opacity: parent.parent.enabled ? (sendButton.hovered ? 1 : 0.7) : 0.3
-                        fadeInDuration: 150
+                        fadeInDuration: 0
                         showPlaceholder: false
-                        
-                        Behavior on opacity {
-                            NumberAnimation {
-                                duration: 150
-                            }
-                        }
                     }
-
                 }
-
             }
-
         }
 
     }
