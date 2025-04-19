@@ -1,4 +1,4 @@
-from utils.logger import logger
+from distiller_cm5_python.utils.logger import logger
 
 
 class StatusManager:

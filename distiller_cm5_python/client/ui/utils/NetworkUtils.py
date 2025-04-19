@@ -1,7 +1,7 @@
 import re
 import subprocess
 import sys
-from utils.logger import logger
+from distiller_cm5_python.utils.logger import logger
 
 
 class NetworkUtils:

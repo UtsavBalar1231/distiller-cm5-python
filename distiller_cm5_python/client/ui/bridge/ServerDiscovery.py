@@ -1,7 +1,7 @@
 import os
 import re
-from utils.logger import logger
-from utils.config import config
+from distiller_cm5_python.utils.logger import logger
+from distiller_cm5_python.utils.config import config
 
 
 class ServerDiscovery:

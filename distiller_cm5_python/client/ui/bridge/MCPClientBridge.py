@@ -1,20 +1,20 @@
 # pyright: reportArgumentType=false
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, QTimer, pyqtProperty
 from PyQt6.QtWidgets import QApplication
-from client.mid_layer.mcp_client import MCPClient
+from distiller_cm5_python.client.mid_layer.mcp_client import MCPClient
 from qasync import asyncSlot
-from utils.config import *
-from utils.logger import logger
+from distiller_cm5_python.utils.config import *
+from distiller_cm5_python.utils.logger import logger
 import asyncio
 import os
 import sys
 import time  # Add time import for debouncing
 
-from client.ui.bridge.ConversationManager import ConversationManager
-from client.ui.bridge.StatusManager import StatusManager
-from client.ui.bridge.ServerDiscovery import ServerDiscovery
-from client.ui.utils.NetworkUtils import NetworkUtils
-from utils.distiller_exception import UserVisibleError, LogOnlyError
+from distiller_cm5_python.client.ui.bridge.ConversationManager import ConversationManager
+from distiller_cm5_python.client.ui.bridge.StatusManager import StatusManager
+from distiller_cm5_python.client.ui.bridge.ServerDiscovery import ServerDiscovery
+from distiller_cm5_python.client.ui.utils.NetworkUtils import NetworkUtils
+from distiller_cm5_python.utils.distiller_exception import UserVisibleError, LogOnlyError
 
 
 class MCPClientBridge(QObject):
@@ -54,7 +54,7 @@ class MCPClientBridge(QObject):
         self._is_connected = False
         self._is_ready = False
         self._loop = asyncio.get_event_loop()
-        self.config_path = DEFAULT_CONFIG_PATH
+        self.config_path = './'
         # Get logging level with proper default value
         self._current_log_level = config.get("logging", "level", default="DEBUG").upper()
         self._selected_server_path = None

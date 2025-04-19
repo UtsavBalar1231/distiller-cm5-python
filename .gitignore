@@ -28,5 +28,5 @@ env/
 *.swp
 *.swo 
 
-.python-version
-pyproject.toml
+# uv 
+uv.lock
