@@ -279,6 +279,12 @@ MAX_MESSAGES_LENGTH = config.get("llm", "max_messages_length")
 # Add Llama.cpp specific constant
 LLAMA_CPP_START_WAIT_TIME = config.get("llama_cpp", "start_wait_time", default=30) # Default 3 seconds
 
+# Display configuration
+EINK_ENABLED = config.get("display", "eink_enabled", False)  # Default to False for local development
+EINK_CAPTURE_INTERVAL = config.get("display", "capture_interval", 500)  # Default interval in ms
+EINK_BUFFER_SIZE = config.get("display", "buffer_size", 2)  # Default buffer size
+EINK_DITHERING_ENABLED = config.get("display", "dithering_enabled", True)  # Default to enabled
+
 # --- Global Configuration Instance ---
 config = Config()
 

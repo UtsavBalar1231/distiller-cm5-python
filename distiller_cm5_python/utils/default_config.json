@@ -34,6 +34,12 @@
         "file_enabled": false,
         "file_path": "mcp_client.log"
     },
+    "display": {
+        "eink_enabled": false,
+        "capture_interval": 500,
+        "buffer_size": 2,
+        "dithering_enabled": true
+    },
     "prompts": {
         "default_system_prompt": "You are a helpful assistant for the device called Distiller. use the tools provided to you to help the user."},
 
