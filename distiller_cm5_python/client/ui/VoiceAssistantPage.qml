@@ -124,11 +124,8 @@ PageBase {
         yesButtonText: "Proceed"
         noButtonText: "Cancel"
         
-        // Hide secondary action
-        showSecondaryAction: false
-        
         // Use accent color for the positive button
-        positiveButtonColor: ThemeManager.accentColor
+        acceptButtonColor: ThemeManager.accentColor
         
         onAccepted: {
             // Disconnect from current server
