@@ -1,4 +1,4 @@
-import QtQuick 2.15
+import QtQuick
 
 // Optimized image component with performance enhancements for e-ink
 Image {

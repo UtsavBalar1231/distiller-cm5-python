@@ -11,6 +11,10 @@ QtObject {
     // console.log("FocusManager: Moving focus up, current index: " + currentFocusIndex);
     // console.log("FocusManager: Moving focus down, current index: " + currentFocusIndex);
     // console.log("FocusManager: Registered scroll view for combined navigation");
+    // console.log("Item position: " + itemY + ", height: " + itemHeight);
+    // console.log("Scroll view position: " + scrollViewY + ", height: " + scrollViewHeight);
+    // Item is above visible area, scroll up
+    // Item is below visible area, scroll down
 
     id: focusManagerSingleton
 
@@ -115,16 +119,10 @@ QtObject {
 
     // Ensure an item is visible within the scroll view
     function ensureItemVisible(item) {
-        // console.log("Item position: " + itemY + ", height: " + itemHeight);
-        // console.log("Scroll view position: " + scrollViewY + ", height: " + scrollViewHeight);
-
         if (!currentScrollView || !item)
             return ;
 
         try {
-            // Item is above visible area, scroll up
-            // Item is below visible area, scroll down
-
             // Get item position relative to the scrollview's content
             var itemGlobalPos = item.mapToItem(currentScrollView.contentItem, 0, 0);
             var itemY = itemGlobalPos.y;

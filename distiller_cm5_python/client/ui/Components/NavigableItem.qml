@@ -1,4 +1,4 @@
-import QtQuick 2.15
+import QtQuick
 
 // Base component for items that can be navigated with Up/Down/Enter keys
 Item {
@@ -10,6 +10,7 @@ Item {
     //         console.log("NavigableItem: Initialized with navigable=true");
     //     }
     // }
+    // console.log("NavigableItem: Forcing focus");
 
     id: navigableItem
 
@@ -54,8 +55,6 @@ Item {
     }
     // Handle property changes
     onIsActiveItemChanged: {
-        // console.log("NavigableItem: Forcing focus");
-
         // console.log("NavigableItem: isActiveItem changed to: " + isActiveItem + " for " + (parent ? parent.objectName || "unnamed" : "no parent"));
         if (isActiveItem)
             forceActiveFocus();
