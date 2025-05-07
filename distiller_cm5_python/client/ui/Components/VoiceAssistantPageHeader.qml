@@ -359,8 +359,8 @@ Rectangle {
     // Close app button - positioned at top right
     AppButton {
         id: closeBtn
-        width: 36
-        height: 36
+        width: ThemeManager.buttonHeight
+        height: ThemeManager.buttonHeight
         anchors.right: parent.right
         anchors.rightMargin: ThemeManager.spacingSmall
         anchors.verticalCenter: parent.verticalCenter
@@ -392,8 +392,8 @@ Rectangle {
             }
             
             Text {
-                text: "⏻" // Power/Shutdown icon
-                font.pixelSize: parent.width * 0.5
+                text: "" // Power/Shutdown icon
+                font.pixelSize: parent.width * 0.3
                 font.family: FontManager.primaryFontFamily
                 color: closeBtn.visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                 anchors.centerIn: parent
