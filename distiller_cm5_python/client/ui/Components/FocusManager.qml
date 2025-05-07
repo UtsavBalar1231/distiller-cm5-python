@@ -44,13 +44,30 @@ QtObject {
 
     // Signal when focus changes
     signal focusChanged(var focusedItem)
+    
+    // Helper function to set visualFocus
+    function setItemFocus(item, value) {
+        if (item) {
+            if (typeof item.visualFocus !== 'undefined') {
+                item.visualFocus = value;
+            }
+        }
+    }
+    
+    // Helper function to check if an item has focus
+    function hasItemFocus(item) {
+        if (item) {
+            if (typeof item.visualFocus !== 'undefined') {
+                return item.visualFocus;
+            }
+        }
+        return false;
+    }
 
     // Reset all focus items
     function clearFocus() {
         for (var i = 0; i < currentFocusItems.length; i++) {
-            if (currentFocusItems[i] && typeof currentFocusItems[i].isActiveItem !== 'undefined')
-                currentFocusItems[i].isActiveItem = false;
-
+            setItemFocus(currentFocusItems[i], false);
         }
     }
 
@@ -68,7 +85,7 @@ QtObject {
         // Set initial focus
         if (currentFocusIndex >= 0 && currentFocusItems[currentFocusIndex]) {
             // console.log("FocusManager: Setting initial focus to item at index " + currentFocusIndex);
-            currentFocusItems[currentFocusIndex].isActiveItem = true;
+            setItemFocus(currentFocusItems[currentFocusIndex], true);
             setFocusToItem(currentFocusItems[currentFocusIndex]);
         }
     }
@@ -93,13 +110,11 @@ QtObject {
         }
         // Reset active state on all items
         for (var j = 0; j < currentFocusItems.length; j++) {
-            if (currentFocusItems[j])
-                currentFocusItems[j].isActiveItem = false;
-
+            setItemFocus(currentFocusItems[j], false);
         }
         // Update current index and set active state
         currentFocusIndex = foundIndex;
-        item.isActiveItem = true;
+        setItemFocus(item, true);
         // If we have a scroll view, try to ensure this item is visible
         if (currentScrollView && item.parent)
             ensureItemVisible(item);
@@ -377,5 +392,4 @@ QtObject {
             exitSpecialMode();
         }
     }
-
 }

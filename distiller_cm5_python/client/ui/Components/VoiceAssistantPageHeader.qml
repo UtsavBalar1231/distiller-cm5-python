@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 
 Rectangle {
     id: header
@@ -26,10 +25,10 @@ Rectangle {
         "llm": "Local"
     }
 
-    signal serverSelectClicked()
+    signal serverSelectClicked
     // Keep the signal to prevent errors
-    signal darkModeClicked()
-    signal closeAppClicked()
+    signal darkModeClicked
+    signal closeAppClicked
     signal showToastMessage(string message, int duration)
 
     // Update WiFi status from bridge
@@ -79,7 +78,7 @@ Rectangle {
         anchors.top: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: 1
+        height: 2
         color: ThemeManager.black
     }
 
@@ -95,6 +94,7 @@ Rectangle {
         navigable: true
         isFlat: false
         text: "" // Set empty text since we're using custom content
+
         onClicked: {
             if (statsPopup.visible)
                 statsPopup.close();
@@ -120,6 +120,7 @@ Rectangle {
                 font: FontManager.small
                 color: serverSelectBtn.visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                 elide: Text.ElideRight
+                renderType: Text.NativeRendering
             }
 
             // Status text - left aligned, smaller font
@@ -132,10 +133,9 @@ Rectangle {
                 font: FontManager.tiny
                 color: serverSelectBtn.visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                 elide: Text.ElideRight
+                renderType: Text.NativeRendering
             }
-
         }
-
     }
 
     // System Status button
@@ -150,6 +150,7 @@ Rectangle {
         navigable: true
         isFlat: true
         buttonRadius: width / 2
+
         onClicked: {
             if (statsPopup.visible) {
                 statsPopup.close();
@@ -183,10 +184,9 @@ Rectangle {
                 font.family: FontManager.primaryFontFamily
                 color: statusBtn.visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                 anchors.centerIn: parent
+                renderType: Text.NativeRendering
             }
-
         }
-
     }
 
     // System stats popup
@@ -198,181 +198,235 @@ Rectangle {
         width: parent.width
         height: parent.parent.height * 0.7 // Cover most of the conversation area height
         padding: ThemeManager.spacingSmall
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         modal: true
         focus: true
-        onClosed: {
-            // Return focus to the status button when popup closes
-            statusBtn.forceActiveFocus();
-        }
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
         background: Rectangle {
             color: ThemeManager.backgroundColor
         }
 
-        contentItem: Column {
-            spacing: ThemeManager.spacingSmall
-            width: parent.width
+        contentItem: Item {
+            Column {
+                id: statsColumn
 
-            // Header with close button
-            Rectangle {
-                width: parent.width
-                height: ThemeManager.buttonHeight
-                color: ThemeManager.transparentColor
+                anchors.fill: parent
+                spacing: ThemeManager.spacingSmall
 
-                // Title
-                Text {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "System Status"
-                    font: FontManager.mediumBold
-                    color: ThemeManager.textColor
-                }
-
-            }
-
-            Rectangle {
-                width: parent.width
-                height: 1
-                color: ThemeManager.backgroundColor
-            }
-
-            // Scrollable content for the stats
-            ScrollView {
-                width: parent.width
-                height: statsPopup.height - 80
-                clip: true
-                ScrollBar.vertical.policy: ScrollBar.AsNeeded
-
-                // Stats content
-                GridLayout {
-                    id: gridLayout
-
+                // System Stats Section
+                Rectangle {
                     width: parent.width
-                    columns: 2
-                    rowSpacing: ThemeManager.spacingNormal
-                    columnSpacing: ThemeManager.spacingLarge
-                    focus: true
+                    height: systemStatsColumn.height + ThemeManager.spacingSmall * 2
+                    color: ThemeManager.backgroundColor
+                    border.width: ThemeManager.borderWidth
+                    border.color: ThemeManager.black
+                    radius: ThemeManager.borderRadius
 
-                    // CPU usage
-                    Text {
-                        text: "CPU:"
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignLeft
+                    Column {
+                        id: systemStatsColumn
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: ThemeManager.spacingSmall
+                        spacing: ThemeManager.spacingSmall
+
+                        Row {
+                            width: parent.width
+                            spacing: ThemeManager.spacingSmall
+
+                            Text {
+                                text: "CPU:"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.2
+                                horizontalAlignment: Text.AlignLeft
+                                renderType: Text.NativeRendering
+                            }
+
+                            Text {
+                                text: systemStats.cpu || "N/A"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.7
+                                horizontalAlignment: Text.AlignLeft
+                                elide: Text.ElideRight
+                                renderType: Text.NativeRendering
+                            }
+                        }
+
+                        Row {
+                            width: parent.width
+                            spacing: ThemeManager.spacingSmall
+
+                            Text {
+                                text: "RAM:"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.2
+                                horizontalAlignment: Text.AlignLeft
+                                renderType: Text.NativeRendering
+                            }
+
+                            Text {
+                                text: systemStats.ram || "N/A"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.7
+                                horizontalAlignment: Text.AlignLeft
+                                elide: Text.ElideRight
+                                renderType: Text.NativeRendering
+                            }
+                        }
+
+                        Row {
+                            width: parent.width
+                            spacing: ThemeManager.spacingSmall
+
+                            Text {
+                                text: "Temp:"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.2
+                                horizontalAlignment: Text.AlignLeft
+                                renderType: Text.NativeRendering
+                            }
+
+                            Text {
+                                text: systemStats.temp || "N/A"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.7
+                                horizontalAlignment: Text.AlignLeft
+                                elide: Text.ElideRight
+                                renderType: Text.NativeRendering
+                            }
+                        }
+
+                        Row {
+                            width: parent.width
+                            spacing: ThemeManager.spacingSmall
+
+                            Text {
+                                text: "LLM:"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.2
+                                horizontalAlignment: Text.AlignLeft
+                                renderType: Text.NativeRendering
+                            }
+
+                            Text {
+                                text: systemStats.llm || "Local"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.7
+                                horizontalAlignment: Text.AlignLeft
+                                elide: Text.ElideRight
+                                renderType: Text.NativeRendering
+                            }
+                        }
                     }
-
-                    Text {
-                        text: systemStats.cpu
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignRight
-                        Layout.fillWidth: true
-                    }
-
-                    // RAM usage
-                    Text {
-                        text: "Memory:"
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignLeft
-                    }
-
-                    Text {
-                        text: systemStats.ram
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignRight
-                        Layout.fillWidth: true
-                    }
-
-                    // Temperature
-                    Text {
-                        text: "Temperature:"
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignLeft
-                    }
-
-                    Text {
-                        text: systemStats.temp
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignRight
-                        Layout.fillWidth: true
-                    }
-
-                    // LLM model
-                    Text {
-                        text: "LLM:"
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignLeft
-                    }
-
-                    Text {
-                        text: systemStats.llm
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignRight
-                        Layout.fillWidth: true
-                    }
-
-                    // WiFi status
-                    Text {
-                        text: "WiFi:"
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignLeft
-                    }
-
-                    Text {
-                        text: wifiConnected ? (wifiName !== "" ? wifiName : "Connected") : "Disconnected"
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignRight
-                        Layout.fillWidth: true
-                    }
-
-                    // IP Address (only shown if WiFi is connected)
-                    Text {
-                        text: "IP Address:"
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignLeft
-                        visible: wifiConnected && ipAddress !== ""
-                    }
-
-                    Text {
-                        text: ipAddress
-                        font.pixelSize: FontManager.fontSizeSmall
-                        font.family: FontManager.primaryFontFamily
-                        color: ThemeManager.textColor
-                        Layout.alignment: Qt.AlignRight
-                        Layout.fillWidth: true
-                        visible: wifiConnected && ipAddress !== ""
-                    }
-
                 }
 
+                // Network Info Section
+                Rectangle {
+                    width: parent.width
+                    height: networkColumn.height + ThemeManager.spacingSmall * 2
+                    color: ThemeManager.backgroundColor
+                    border.width: ThemeManager.borderWidth
+                    border.color: ThemeManager.black
+                    radius: ThemeManager.borderRadius
+
+                    Column {
+                        id: networkColumn
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: ThemeManager.spacingSmall
+                        spacing: ThemeManager.spacingSmall
+
+                        Row {
+                            width: parent.width
+                            spacing: ThemeManager.spacingSmall
+
+                            Text {
+                                text: "WiFi:"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.2
+                                horizontalAlignment: Text.AlignLeft
+                                renderType: Text.NativeRendering
+                            }
+
+                            Text {
+                                text: wifiConnected ? "Connected" : "Not Connected"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.7
+                                horizontalAlignment: Text.AlignLeft
+                                elide: Text.ElideRight
+                                renderType: Text.NativeRendering
+                            }
+                        }
+
+                        Row {
+                            width: parent.width
+                            spacing: ThemeManager.spacingSmall
+                            visible: wifiConnected && wifiName.length > 0
+
+                            Text {
+                                text: "SSID:"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.2
+                                horizontalAlignment: Text.AlignLeft
+                                renderType: Text.NativeRendering
+                            }
+
+                            Text {
+                                text: wifiName
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.7
+                                horizontalAlignment: Text.AlignLeft
+                                elide: Text.ElideRight
+                                renderType: Text.NativeRendering
+                            }
+                        }
+
+                        Row {
+                            width: parent.width
+                            spacing: ThemeManager.spacingSmall
+                            visible: wifiConnected && ipAddress.length > 0
+
+                            Text {
+                                text: "IP:"
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.2
+                                horizontalAlignment: Text.AlignLeft
+                                renderType: Text.NativeRendering
+                            }
+
+                            Text {
+                                text: ipAddress
+                                font: FontManager.small
+                                color: ThemeManager.textColor
+                                width: parent.width * 0.7
+                                horizontalAlignment: Text.AlignLeft
+                                elide: Text.ElideRight
+                                renderType: Text.NativeRendering
+                            }
+                        }
+                    }
+                }
             }
-
         }
-
     }
 
-    // Close app button - positioned at top right
+    // Close application button
     AppButton {
         id: closeBtn
 
@@ -415,9 +469,7 @@ Rectangle {
                 color: closeBtn.visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                 anchors.centerIn: parent
             }
-
         }
-
     }
 
     // Close app timer - simple delay before closing
@@ -459,5 +511,4 @@ Rectangle {
             shutdownConfirmDialog.close();
         }
     }
-
 }

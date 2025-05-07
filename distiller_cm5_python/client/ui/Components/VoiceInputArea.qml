@@ -212,9 +212,9 @@ Rectangle {
         anchors.horizontalCenter: parent.horizontalCenter
         text: {
             // Dynamic text based on which button has focus
-            if (voiceButton.isActiveItem)
+            if (voiceButton.visualFocus)
                 return voiceInputArea.stateHint;
-            else if (resetButton.isActiveItem)
+            else if (resetButton.visualFocus)
                 return "Reset App";
             else
                 return "";
@@ -225,7 +225,7 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         z: 20 // Make sure it appears above everything
         // Show hint text whenever the app is not idle, or if a button has focus (and hint is enabled)
-        visible: showStatusHint && (appState !== "idle" || (voiceButton.isActiveItem || resetButton.isActiveItem))
+        visible: showStatusHint && (appState !== "idle" || (voiceButton.visualFocus || resetButton.visualFocus))
     }
 
     // Transcribed text display
@@ -287,7 +287,7 @@ Rectangle {
                 id: voiceButton
 
                 property bool navigable: isConnected // Only navigable when connected
-                property bool isActiveItem: false
+                property bool visualFocus: false
                 property bool checked: voiceInputArea.isListening
 
                 // Activate when Enter is pressed via FocusManager
@@ -388,10 +388,10 @@ Rectangle {
 
                     // High contrast highlight for e-ink when focused
                     Rectangle {
-                        visible: voiceButton.isActiveItem || voiceButton.pressed || true // Always visible
+                        visible: voiceButton.visualFocus || voiceButton.pressed || true // Always visible
                         anchors.fill: parent
                         radius: width / 2
-                        color: voiceButton.isActiveItem ? ThemeManager.textColor : ThemeManager.backgroundColor
+                        color: voiceButton.visualFocus ? ThemeManager.textColor : ThemeManager.backgroundColor
                         border.width: ThemeManager.borderWidth
                         border.color: ThemeManager.black
                         antialiasing: true
@@ -428,7 +428,7 @@ Rectangle {
                         anchors.centerIn: parent
                         font.pixelSize: parent.width * 0.45 // Slightly smaller for cleaner look
                         // Color based on connection state and focus state
-                        color: voiceButton.isActiveItem ? ThemeManager.backgroundColor : ThemeManager.textColor
+                        color: voiceButton.visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                     }
@@ -442,7 +442,7 @@ Rectangle {
                 id: resetButton
 
                 property bool navigable: true
-                property bool isActiveItem: false
+                property bool visualFocus: false
 
                 objectName: "resetButton"
                 width: ThemeManager.buttonHeight
@@ -460,10 +460,10 @@ Rectangle {
 
                     // High contrast highlight for e-ink when focused
                     Rectangle {
-                        visible: resetButton.isActiveItem || resetButton.pressed || true // Always visible
+                        visible: resetButton.visualFocus || resetButton.pressed || true // Always visible
                         anchors.fill: parent
                         radius: width / 2
-                        color: resetButton.isActiveItem ? ThemeManager.textColor : ThemeManager.backgroundColor
+                        color: resetButton.visualFocus ? ThemeManager.textColor : ThemeManager.backgroundColor
                         border.width: ThemeManager.borderWidth
                         border.color: ThemeManager.black
                         antialiasing: true
@@ -473,7 +473,7 @@ Rectangle {
                         text: "↻" // Reset icon as text
                         font.pixelSize: parent.width * 0.5
                         font.family: FontManager.primaryFontFamily
-                        color: resetButton.isActiveItem ? ThemeManager.backgroundColor : ThemeManager.textColor
+                        color: resetButton.visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         anchors.centerIn: parent

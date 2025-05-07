@@ -1,5 +1,5 @@
-import QtQuick
 pragma Singleton
+import QtQuick
 
 QtObject {
     // Subtle overlay for hover effects
@@ -73,5 +73,4 @@ QtObject {
     function setDarkMode(isDark) {
         darkMode = isDark;
     }
-
 }

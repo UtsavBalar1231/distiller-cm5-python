@@ -201,8 +201,8 @@ Dialog {
                 visible: standardButtonTypes & DialogButtonBox.Ok
                 width: buttonRow.buttonWidth
                 height: ThemeManager.buttonHeight
-                backgroundColor: isActiveItem ? focusButtonColor : acceptButtonColor
-                textColor: isActiveItem ? ThemeManager.backgroundColor : ThemeManager.textColor
+                backgroundColor: visualFocus ? focusButtonColor : acceptButtonColor
+                textColor: visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                 onClicked: {
                     root.accept();
                     root.close();
@@ -219,8 +219,8 @@ Dialog {
                 visible: standardButtonTypes & DialogButtonBox.Yes
                 width: buttonRow.buttonWidth
                 height: ThemeManager.buttonHeight
-                backgroundColor: isActiveItem ? focusButtonColor : acceptButtonColor
-                textColor: isActiveItem ? ThemeManager.backgroundColor : ThemeManager.textColor
+                backgroundColor: visualFocus ? focusButtonColor : acceptButtonColor
+                textColor: visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                 onClicked: {
                     root.accept();
                     root.close();
@@ -237,8 +237,8 @@ Dialog {
                 visible: standardButtonTypes & DialogButtonBox.Cancel
                 width: buttonRow.buttonWidth
                 height: ThemeManager.buttonHeight
-                backgroundColor: isActiveItem ? focusButtonColor : defaultButtonColor
-                textColor: isActiveItem ? ThemeManager.backgroundColor : ThemeManager.textColor
+                backgroundColor: visualFocus ? focusButtonColor : defaultButtonColor
+                textColor: visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                 onClicked: {
                     root.reject();
                     root.close();
@@ -255,8 +255,8 @@ Dialog {
                 visible: standardButtonTypes & DialogButtonBox.No
                 width: buttonRow.buttonWidth
                 height: ThemeManager.buttonHeight
-                backgroundColor: isActiveItem ? focusButtonColor : defaultButtonColor
-                textColor: isActiveItem ? ThemeManager.backgroundColor : ThemeManager.textColor
+                backgroundColor: visualFocus ? focusButtonColor : defaultButtonColor
+                textColor: visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                 onClicked: {
                     root.reject();
                     root.close();

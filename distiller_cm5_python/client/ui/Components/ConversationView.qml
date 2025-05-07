@@ -8,7 +8,7 @@ ListView {
     // Track if a response is being generated
     property bool navigable: true
     // Make focusable for keyboard navigation
-    property bool isActiveItem: false
+    property bool visualFocus: false
     // For focus management
     property bool scrollModeActive: false
     // Track if scroll mode is active
@@ -46,7 +46,7 @@ ListView {
     }
 
     objectName: "conversationView"
-    focus: isActiveItem
+    focus: visualFocus
     clip: true
     spacing: ThemeManager.spacingSmall
     interactive: true
@@ -118,7 +118,7 @@ ListView {
         border.width: ThemeManager.borderWidth
         border.color: ThemeManager.textColor
         radius: ThemeManager.borderRadius
-        visible: isActiveItem && !scrollModeActive && conversationView.contentHeight > conversationView.height
+        visible: visualFocus && !scrollModeActive && conversationView.contentHeight > conversationView.height
         z: 2
 
         Text {

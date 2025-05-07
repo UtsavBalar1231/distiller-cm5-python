@@ -292,15 +292,15 @@ Rectangle {
                     });
                 }
                 // Ensure the item scrolls into view when it receives focus
-                onIsActiveItemChanged: {
-                    if (isActiveItem)
+                onVisualFocusChanged: {
+                    if (visualFocus)
                         serverList.positionViewAtIndex(index, ListView.Contain);
 
                 }
 
                 Rectangle {
                     anchors.fill: parent
-                    color: parent.isActiveItem ? ThemeManager.textColor : ThemeManager.transparentColor
+                    color: parent.visualFocus ? ThemeManager.textColor : ThemeManager.transparentColor
                     border.width: ThemeManager.borderWidth
                     border.color: ThemeManager.black
                     radius: ThemeManager.borderRadius
@@ -321,7 +321,7 @@ Rectangle {
                                 width: parent.width
                                 font.pixelSize: FontManager.fontSizeNormal
                                 font.family: FontManager.primaryFontFamily
-                                color: serverItem.isActiveItem ? ThemeManager.backgroundColor : ThemeManager.textColor
+                                color: serverItem.visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                                 elide: Text.ElideRight
                             }
 
@@ -333,7 +333,7 @@ Rectangle {
                                 width: parent.width
                                 font.pixelSize: FontManager.fontSizeSmall
                                 font.family: FontManager.primaryFontFamily
-                                color: serverItem.isActiveItem ? ThemeManager.backgroundColor : ThemeManager.textColor
+                                color: serverItem.visualFocus ? ThemeManager.backgroundColor : ThemeManager.textColor
                                 elide: Text.ElideRight
                                 maximumLineCount: 2
                                 wrapMode: Text.WordWrap
