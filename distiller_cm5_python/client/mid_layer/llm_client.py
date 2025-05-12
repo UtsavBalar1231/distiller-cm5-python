@@ -17,6 +17,7 @@ from distiller_cm5_python.utils.config import (
     N_CTX,
     MAX_TOKENS,
     STOP,
+    MIN_P,
 )  # Removed unused OPENAI_URL, DEEPSEEK_URL
 from distiller_cm5_python.utils.distiller_exception import (
     UserVisibleError,
@@ -229,6 +230,7 @@ class LLMClient:
             "temperature": TEMPERATURE,
             "top_p": TOP_P,
             "top_k": TOP_K,
+            "min_p": MIN_P,
             "repetition_penalty": REPETITION_PENALTY,
             "max_tokens": MAX_TOKENS,
             "stop": STOP,
@@ -837,7 +839,10 @@ class LLMClient:
                                         if "<think>" in delta_content or "</think>" in delta_content: 
                                             delta_content = delta_content.replace("<think>", "").replace("</think>", "")
 
-                                        full_response_content += delta_content
+                                        # adapt for thinking method in Qwen 3 
+                                        if "<think>" in delta_content or "</think>" in delta_content: 
+                                            delta_content = delta_content.replace("<think>", "").replace("</think>", "").strip()
+
                                         # Detect potential inline tool call markers (fallback)
                                         # Switch content type if marker found and not already ACTION
                                         if (
