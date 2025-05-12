@@ -2,7 +2,7 @@
   "llm_providers": {
     "llama-cpp": {
       "server_url": "http://127.0.0.1:8000",
-      "model_name": "qwen2.5-3b-instruct-q4_k_m.gguf",
+      "model_name": "Qwen3-1.7B-Q4_K_M.gguf",
       "provider_type": "llama-cpp",
       "api_key": "",
       "timeout": 150,
