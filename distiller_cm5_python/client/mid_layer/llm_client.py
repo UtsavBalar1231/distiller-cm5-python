@@ -837,8 +837,11 @@ class LLMClient:
                                         delta_content = delta["content"]
                                         # adapt for thinking method in Qwen 3 
                                         if "<think>" in delta_content or "</think>" in delta_content: 
-                                            delta_content = delta_content.replace("<think>", "").replace("</think>", "")
+                                            delta_content = delta_content.replace("<think>", "").replace("</think>", "").strip()
 
+                                        if delta_content == "" or delta_content == "\n\n":
+                                            continue
+                                            
                                         full_response_content += delta_content
                                         # Detect potential inline tool call markers (fallback)
                                         # Switch content type if marker found and not already ACTION
