@@ -44,7 +44,6 @@ NAME = 'name'
 SYSTEM = 'system'
 USER = 'user'
 ASSISTANT = 'assistant'
-FUNCTION = 'function' # Represents Tool Results internally
 TOOL = 'tool' # API role for tool results
 
 # Content Types (for potential future multi-modal use)
@@ -69,9 +68,6 @@ class BaseModelCompatibleDict(BaseModel):
     def model_dump(self, **kwargs):
         if 'exclude_none' not in kwargs:
             kwargs['exclude_none'] = True
-        # Rely on Pydantic's super().model_dump() to correctly serialize
-        # nested models and basic types. Stringification of arguments for API
-        # is handled in get_formatted_messages.
         dumped_data = super().model_dump(**kwargs)
         return dumped_data
 
@@ -106,84 +102,19 @@ class BaseModelCompatibleDict(BaseModel):
         extra = 'allow'
 
 
-class FunctionCall(BaseModelCompatibleDict):
-    """ Represents a function call requested by the assistant. """
-    name: str
-    # Arguments are often passed as a JSON string by LLMs, but can be dict internally
-    arguments: Union[str, Dict[str, Any]]
-
-    def __init__(self, name: str, arguments: Union[str, Dict[str, Any]]):
-        super().__init__(name=name, arguments=arguments)
-
-
-class ContentItem(BaseModelCompatibleDict):
-    """ Represents a single piece of content within a message (e.g., text, image). """
-    text: Optional[str] = None
-    image: Optional[str] = None # Placeholder for image data/URI
-    file: Optional[str] = None # Placeholder for file data/URI
-    audio: Optional[Union[str, dict]] = None # Placeholder for audio data/URI
-    video: Optional[Union[str, list]] = None # Placeholder for video data/URI
-
-    def __init__(self,
-                 text: Optional[str] = None,
-                 image: Optional[str] = None,
-                 file: Optional[str] = None,
-                 audio: Optional[Union[str, dict]] = None,
-                 video: Optional[Union[str, list]] = None):
-        super().__init__(text=text, image=image, file=file, audio=audio, video=video)
-
-    @model_validator(mode='after')
-    def check_exclusivity(self):
-        provided_fields = sum(1 for v in [self.text, self.image, self.file, self.audio, self.video] if v is not None)
-        if provided_fields != 1:
-            raise ValueError(f"Exactly one of '{TEXT}', '{IMAGE}', '{FILE}', '{AUDIO}', or '{VIDEO}' must be provided. Found {provided_fields}.")
-        return self
-
-    def get_type_and_value(self) -> Tuple[Literal['text', 'image', 'file', 'audio', 'video'], Any]:
-        # Iterate through fields to find the non-None one
-        for field_name in [TEXT, IMAGE, FILE, AUDIO, VIDEO]:
-            value = getattr(self, field_name)
-            if value is not None:
-                return field_name, value
-        raise ValueError("ContentItem is invalid; no value field is set.") # Should not happen if validator works
-
-    @property
-    def type(self) -> Literal['text', 'image', 'file', 'audio', 'video']:
-        t, _ = self.get_type_and_value()
-        return t
-
-    @property
-    def value(self) -> Any:
-        _, v = self.get_type_and_value()
-        return v
-
-# Represents the structure expected by many LLM APIs for assistant tool calls
-class ToolCall(BaseModelCompatibleDict):
-    id: str
-    type: Literal['function'] = 'function'
-    function: FunctionCall
-
-    def __init__(self, id: str, function: FunctionCall):
-        super().__init__(id=id, function=function)
-
-
 class Message(BaseModelCompatibleDict):
     """ Represents a single message in the conversation history using Pydantic. """
     role: str
-    content: Union[str, List[ContentItem], None] # Allow None content, e.g., for assistant message with only tool calls
-    # Optional fields based on role and context
-    name: Optional[str] = None # Used for FUNCTION role (tool_call_id) or optionally USER role name
-    # Tool calls specifically for assistant messages
-    tool_calls: Optional[List[ToolCall]] = None
-    # Tool call ID specifically for tool/function result messages
+    content: str
+    tool_calls: Optional[List[Dict[str, Any]]] = None
     tool_call_id: Optional[str] = None
     extra: Optional[Dict[str, Any]] = None # Flexible field for additional metadata
 
     def __init__(self,
                  role: str,
-                 content: Union[str, List[ContentItem], None],
+                 content: str,
                  name: Optional[str] = None,
-                 tool_calls: Optional[List[ToolCall]] = None,
+                 tool_calls: Optional[List[Dict[str, Any]]] = None,
                  tool_call_id: Optional[str] = None,
                  extra: Optional[Dict[str, Any]] = None,
                  **kwargs): # Allow capturing other potential fields into extra
@@ -204,26 +135,12 @@ class Message(BaseModelCompatibleDict):
     @field_validator('role')
     def role_checker(cls, value: str) -> str:
         # Allow 'tool' initially for easier transition from old format, map later if needed
-        allowed_roles = [USER, ASSISTANT, SYSTEM, FUNCTION, TOOL]
+        allowed_roles = [USER, ASSISTANT, SYSTEM, TOOL]
         if value not in allowed_roles:
             raise ValueError(f"Role '{value}' must be one of {', '.join(allowed_roles)}")
-        # Map 'tool' role internally to 'function' for consistency
-        if value == TOOL:
-            return FUNCTION
         return value
 
-    @field_validator('content')
-    def content_validator(cls, value: Union[str, List[ContentItem], None]) -> Union[str, List[ContentItem], None]:
-        if isinstance(value, list):
-            if not value: # Empty list is allowed
-                 return value
-            if not all(isinstance(item, ContentItem) for item in value):
-                raise ValueError("If content is a list, all items must be ContentItem objects.")
-        # Allow string or None, but raise error for other types
-        elif not isinstance(value, (str, type(None))):
-             raise ValueError("Content must be a string, None, or a list of ContentItem objects.")
-        return value
-
+    
     @model_validator(mode='after')
     def check_role_specific_fields(self):
         # Tool calls should only exist for assistant messages
@@ -231,12 +148,12 @@ class Message(BaseModelCompatibleDict):
             raise ValueError(f"'tool_calls' field is only applicable for role '{ASSISTANT}'. Role is '{self.role}'.")
 
         # Tool call ID should only exist for function/tool messages
-        if self.role != FUNCTION and self.tool_call_id is not None:
-             raise ValueError(f"'tool_call_id' field is only applicable for role '{FUNCTION}' (or '{TOOL}'). Role is '{self.role}'.")
+        if self.role != TOOL and self.tool_call_id is not None:
+             raise ValueError(f"'tool_call_id' field is only applicable for role '{TOOL}'.")
 
         # Function/tool messages must have a tool_call_id
-        if self.role == FUNCTION and self.tool_call_id is None:
-            raise ValueError(f"Messages with role '{FUNCTION}' (or '{TOOL}') must have a 'tool_call_id'.")
+        if self.role == TOOL and self.tool_call_id is None:
+            raise ValueError(f"Messages with role '{TOOL}' must have a 'tool_call_id'.")
 
         # Assistant messages with tool_calls might have None or empty string content
         if self.role == ASSISTANT and self.tool_calls:
@@ -274,7 +191,7 @@ class MessageProcessor:
     def add_message(
         self,
         role: str,
-        content: Union[str, List[ContentItem], None],
+        content: str,
         metadata: Dict[str, Any] = None,
         tool_calls: Optional[List[Dict[str, Any]]] = None, # Raw tool calls for assistant
         tool_call_id: Optional[str] = None, # ID for tool results
@@ -302,64 +219,22 @@ class MessageProcessor:
                     break
 
         try:
-            # Prepare Pydantic Message arguments
-            message_args = {
-                "role": role,
-                "content": content,
-                "tool_call_id": tool_call_id, # Will be validated based on role
-                "extra": metadata or {},
-            }
-
-            # Process raw tool_calls for assistant messages into Pydantic ToolCall objects
-            if role == ASSISTANT and tool_calls:
-                parsed_tool_calls = []
-                for tc in tool_calls:
-                    try:
-                        # Ensure arguments are parsed/handled correctly (assuming string or dict)
-                        func_args = tc.get('function', {}).get('arguments')
-                        if isinstance(func_args, str):
-                            try:
-                                # Attempt to parse if it looks like JSON, otherwise keep as string
-                                if func_args.strip().startswith(("{", "[")):
-                                    func_args = json.loads(func_args)
-                            except json.JSONDecodeError:
-                                pass # Keep as string if not valid JSON
-
-                        pydantic_func = FunctionCall(
-                            name=tc.get('function', {}).get('name', 'unknown_function'),
-                            arguments=func_args
-                        )
-                        pydantic_tool_call = ToolCall(
-                            id=tc.get('id', 'unknown_id'),
-                            function=pydantic_func
-                        )
-                        parsed_tool_calls.append(pydantic_tool_call)
-                    except Exception as e:
-                        logger.error(f"Failed to parse tool call structure: {tc}. Error: {e}")
-                        # Decide whether to skip this tool call or raise
-                        continue
-                message_args["tool_calls"] = parsed_tool_calls
-                # Per API spec, content might be None/empty if tool_calls are present
-                if not content and parsed_tool_calls:
-                     message_args["content"] = None
-
-            elif role == TOOL:
-                # The 'tool' role from input is mapped to FUNCTION internally by Pydantic model
-                 if not tool_call_id:
-                     logger.warning("Attempted to add tool result message without tool_call_id. Discarding.")
-                     return # Early exit, finally block will still execute
-
-            # Attempt to create the Pydantic Message object
-            try:
-                message = Message(**message_args)
-            except Exception as e: # Catches Pydantic validation errors for Message
-                logger.error(f"Failed to create Pydantic Message object with args {message_args}: {e}")
-                # Re-raise to indicate failure; finally block will execute before propagation.
-                raise LogOnlyError(f"Internal error creating message object: {e}")
-
-            # If message creation was successful, add to history
-            self.message_history.append(message)
-
+            # Create and append the Pydantic Message object.
+            # Pydantic validators within the Message model will handle role-specific field checks
+            # (e.g., tool_calls for ASSISTANT, tool_call_id for TOOL).
+            new_message = Message(
+                role=role,
+                content=content if content else "",
+                tool_calls=tool_calls,
+                tool_call_id=tool_call_id,
+                extra=metadata # Pass metadata dict (or None) as extra
+            )
+            self.message_history.append(new_message)
+        except (ValueError, TypeError) as e: # Catch Pydantic validation errors or TypeErrors
+            logger.error(f"MessageProcessor.add_message: Failed to create Message object. Role: '{role}', Content snippet: '{str(content)[:50]}...', Error: {e}")
+            # Encapsulate as a LogOnlyError to prevent verbose user-facing errors for internal validation issues
+            raise LogOnlyError(f"Internal error processing message for role '{role}': {e}")
+        
         finally:
             # This will be executed even if an early return happens (e.g., for TOOL role)
             # or if LogOnlyError is raised from the Message creation.
@@ -391,52 +266,49 @@ class MessageProcessor:
             f"MessageProcessor.set_system_message: System message set: {str(content)[:50]}..."
         )
 
-    def add_tool_call(self, tool_call: Dict[str, Any]) -> None:
-        """Add a tool call message to the assistant's last turn. Returns None."""
+    def add_tool_call(self, tool_call_input: Dict[str, Any]) -> None:
+        """Add an assistant message representing a tool call to the history.
+
+        Args:
+            tool_call_input: The raw tool call dictionary.
+        """
         try:
             tool_name = (
-                tool_call.get("function", {}).get("name", "")
-                if "function" in tool_call
-                else tool_call.get("name", "")
+                tool_call_input.get("function", {}).get("name", "")
+                if "function" in tool_call_input
+                else tool_call_input.get("name", "")
             )
-            tool_args = (
-                tool_call.get("function", {}).get("arguments", {})
-                if "function" in tool_call
-                else tool_call.get("arguments", {})
+            tool_args_raw = (
+                tool_call_input.get("function", {}).get("arguments", {})
+                if "function" in tool_call_input
+                else tool_call_input.get("arguments", {})
             )
-            tool_call_id = tool_call.get("id", tool_name)
+            # Use 'id' from input; fallback to tool_name if 'id' is not present.
+            # The LLM response should provide an 'id' for each tool_call.
+            tool_call_id = tool_call_input.get("id", tool_name)
 
-            if not self.message_history or self.message_history[-1].role != ASSISTANT:
-                logger.error("add_tool_call: Cannot add tool call. Last message is not from the assistant.")
-                # Raise to indicate failure; finally block will execute before propagation.
-                raise LogOnlyError("Attempted to add tool call when last message was not from assistant.")
+            # Ensure the last message is an ASSISTANT message suitable for appending tool calls.
+            # If not, or if it already has content, add a new ASSISTANT message.
+            if not self.message_history or self.message_history[-1].role != ASSISTANT or (self.message_history[-1].role == ASSISTANT and self.message_history[-1].content != ""):
+                # The Message model initializes tool_calls to None if not provided.
+                self.add_message(role=ASSISTANT, content="", tool_calls=[]) # Initialize with empty list
+            
+            assistant_message = self.message_history[-1] # Get the (potentially new) last message
 
-            assistant_message = self.message_history[-1]
-
-            # Prepare the single tool call in the Pydantic structure
-            try:
-                if isinstance(tool_args, str):
-                    try:
-                        # Attempt to parse if it looks like JSON, otherwise keep as string
-                        if tool_args.strip().startswith(("{", "[")):
-                            tool_args = json.loads(tool_args)
-                    except json.JSONDecodeError:
-                        pass # Keep as string if not valid JSON
-                pydantic_func = FunctionCall(name=tool_name, arguments=tool_args)
-                pydantic_tool_call = ToolCall(id=tool_call_id, function=pydantic_func)
-            except Exception as e: # Catches Pydantic validation errors for FunctionCall/ToolCall
-                logger.error(f"Failed to create Pydantic ToolCall structure: {e}")
-                # Re-raise to indicate failure; finally block will execute before propagation.
-                raise LogOnlyError(f"Internal error creating ToolCall object: {e}")
-
+            # Ensure tool_calls list exists on the assistant_message Pydantic model
             if assistant_message.tool_calls is None:
                 assistant_message.tool_calls = []
 
-            assistant_message.tool_calls.append(pydantic_tool_call)
+            # Append the new tool call (as a dictionary) to the assistant_message's tool_calls list.
+            # The structure here matches what the OpenAI API expects.
+            assistant_message.tool_calls.append(
+                {
+                    "id": tool_call_id,
+                    "type": "function", # Standard type for tool calls
+                    "function": {"name": tool_name, "arguments": tool_args_raw},
+                }
+            )
 
-            if not assistant_message.content:
-                 assistant_message.content = None
-            # Implicit return None if successful
         finally:
             if self.save_debug_traffic:
                 self._save_debug_traffic()
@@ -464,63 +336,139 @@ class MessageProcessor:
             "message_type": "tool_result",
         }
 
-        self.add_message(FUNCTION, result, metadata)
+        self.add_message(role=TOOL, content=result, tool_call_id=tool_call_id, metadata=metadata)
 
         # If debug traffic dump is enabled, track detailed message traffic
         if self.save_debug_traffic:
             self._save_debug_traffic()
 
-        # Truncate result for logging
-        log_result_snippet = str(result)[:100] + (
-            "..." if len(str(result)) > 100 else ""
-        )
         logger.debug(
-            f"MessageProcessor.add_tool_result: Added result for '{tool_name}'. Content: '{log_result_snippet}'"
+            f"MessageProcessor.add_tool_result: Added result for '{tool_name}'. Content: '{result}'"
         )
 
         # Return None as the event is not used by the caller
         return None
 
+    def add_failed_tool_gen(
+        self, original_snippet: str, tool_call_dict: Dict[str, Any], error_details_str: str
+    ) -> None:
+        """Add a message indicating a failure during LLM tool call generation/parsing."""
+        tool_call_id = tool_call_dict.get("id", "unknown_gen_failure_id")
+        tool_name = tool_call_dict.get("function", {}).get(
+            "name", "__llm_tool_parse_error__"
+        ) # Default to the special name
+
+        metadata = {
+            "tool_name": tool_name,
+            "tool_call_id": tool_call_id,
+            "is_tool_result": True, # Still a result, albeit an error one
+            "is_generation_failure": True,
+            "message_type": "tool_generation_failure",
+        }
+
+        # Add the failed assistant message
+        self.add_message(
+            role=ASSISTANT,
+            content=f"<tool_call>{original_snippet}</tool_call>",
+            tool_calls=[]
+        )
+
+        # add error output message
+        self.add_message(
+            role=TOOL,
+            content=error_details_str,
+            tool_call_id=tool_call_id,
+        )
+        logger.warning(
+            f"MessageProcessor.add_failed_tool_gen: Added generation failure for tool_id '{tool_call_id}'. Error: '{error_details_str}'"
+        )
+        # No return needed, similar to add_tool_result
+
+    def add_failed_tool_execute(
+        self, attempted_tool_call_dict: Dict[str, Any], execution_error_str: str
+    ) -> None:
+        """Add a message indicating a failure during tool execution."""
+        tool_call_id = attempted_tool_call_dict.get("id", "unknown_exec_failure_id")
+        tool_name = attempted_tool_call_dict.get("function", {}).get(
+            "name", "unknown_tool"
+        )
+        tool_args = attempted_tool_call_dict.get("function", {}).get("arguments", {})
+
+        metadata = {
+            "tool_name": tool_name,
+            "tool_call_id": tool_call_id,
+            "tool_args": tool_args, # Include args for execution failures
+            "is_tool_result": True,
+            "is_execution_failure": True,
+            "message_type": "tool_execution_failure",
+        }
+
+        self.add_message(
+            role=TOOL,
+            content=execution_error_str,
+            tool_call_id=tool_call_id,
+            metadata=metadata,
+        )
+        logger.warning(
+            f"MessageProcessor.add_failed_tool_execute: Added execution failure for tool '{tool_name}' (id: '{tool_call_id}'). Error: '{execution_error_str}'"
+        )
+        # No return needed
+
     def get_formatted_messages(
         self,
     ) -> List[Dict[str, Union[str, List[Dict[str, Any]]]]]:
-        """Get the message history formatted for LLM API
+        """Get the message history formatted for LLM API, using Pydantic model_dump.
 
         Returns:
-            List of formatted messages
+            List of formatted messages suitable for the API.
         """
 
         formatted_messages = []
 
         for message in self.message_history:
+            # Ensure that message is a Pydantic Message object
+            if not isinstance(message, Message):
+                logger.warning(f"Skipping non-Message object in history: {type(message)}")
+                continue
+
             role = message.role
-            content = message.content
-            tool_calls = message.tool_calls if message.tool_calls else []
-            metadata = message.extra
-            
-            # Handle tool results with special formatting
-            if role == TOOL and metadata.get("is_tool_result", False):
-                tool_name = metadata.get("tool_name", "unknown_tool")
-                tool_call_id = metadata.get("tool_call_id", tool_name)
-                formatted_messages.append(
-                    {
-                        "role": TOOL,
-                        "type": "function_call_output",
-                        "tool_call_id": tool_call_id,
-                        "content": content,
-                    }
-                )
 
-            elif role in [USER, SYSTEM] or (
-                role == ASSISTANT and len(tool_calls) == 0
-            ):
-                formatted_messages.append({"role": role, "content": content})
+            if role == TOOL:
+                # Tool messages have a specific format required by APIs.
+                # The tool_call_id should be directly on the Message object.
+                if message.tool_call_id:
+                    formatted_messages.append(
+                        {
+                            "role": TOOL,
+                            "tool_call_id": message.tool_call_id,
+                            "content": message.content, # Content is the string result
+                        }
+                    )
+                else:
+                    # This case should ideally not happen if add_tool_result ensures tool_call_id
+                    logger.warning(
+                        f"Tool message found without a tool_call_id. Content: {str(message.content)[:50]}... This message will be skipped in formatted output."
+                    )
             elif role == ASSISTANT:
-                # Standard message formatting
-                formatted_messages.append(
-                    {"role": role, "content": content, "tool_calls": tool_calls}
-                )
+                # Assistant messages can have content, tool_calls, or both (content can be None).
+                # We use model_dump to get the relevant fields.
+                # exclude_none=True is important if content is None but tool_calls are present.
+                if message.tool_calls:
+                    msg_dict = message.model_dump(
+                        include={'role', 'content', 'tool_calls'},
+                        exclude_none=True
+                    )
+                else:
+                    msg_dict = message.model_dump(include={'role', 'content'})
+                formatted_messages.append(msg_dict)
 
+            elif role in [USER, SYSTEM]:
+                # User and System messages typically only have role and content.
+                msg_dict = message.model_dump(include={'role', 'content'})
+                formatted_messages.append(msg_dict)
+            else:
+                logger.warning(f"Unhandled message role '{role}' during formatting. Skipping message.")
+        
         logger.debug(
             f"MessageProcessor.get_formatted_messages: {len(formatted_messages)} messages returned"
         )
@@ -691,18 +639,6 @@ class ToolProcessor:
 
         tool_name = tool_call.get("function", {}).get("name", "")
         args = tool_call.get("function", {}).get("arguments", {})
-
-        # Extract arguments; could be string (JSON) or dict
-        if isinstance(args, str):
-            try:
-                # Try to parse as JSON if it's a string
-                import json
-
-                args = json.loads(args.strip())
-            except:
-                # If fails, use as is - will likely cause issues,
-                # but better than failing entirely
-                pass
 
         logger.debug(
             f"ToolProcessor.execute_tool_call_async: Executing {tool_name} with args: {args}"
