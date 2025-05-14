@@ -41,6 +41,7 @@ MODEL = None
 class Message(BaseModel):
     role: str
     content: str
+    tool_calls: Optional[List[Dict[str, Any]]] = None
 
 
 class SetModel(BaseModel):
@@ -268,14 +269,13 @@ def format_prompt(messages, tools):
 
 
 def format_messages(messages):
-    formatted_messages = [
-        {"role": msg.role, "content": msg.content} for msg in messages
-    ]
-    # Move the followig to the client side
-    # for i in range(len(formatted_messages)):
-    #     if formatted_messages[i]["role"] == "function":
-    #         formatted_messages[i]["role"] = "user"
-    #         formatted_messages[i]["content"] = "[TOOL EXECUTION RESULT]" + formatted_messages[i]["content"]
+    # if tool_call is None, remove it
+    formatted_messages = []
+    for msg in messages:
+        if msg.tool_calls is not None:
+            formatted_messages.append({"role": msg.role, "content": msg.content, "tool_calls": msg.tool_calls})
+        else:
+            formatted_messages.append({"role": msg.role, "content": msg.content})
     return formatted_messages
 
 
@@ -351,6 +351,8 @@ async def create_chat_completion(request: ChatCompletionRequest):
 
         messages = format_messages(request.messages)
         tools = format_tools(request.tools) if request.tools else []
+
+        logger.debug(f"message {messages} , tools {tools}")
 
         # Check if stream parameter is in request
         stream = request.stream
