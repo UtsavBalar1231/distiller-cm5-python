@@ -352,8 +352,6 @@ async def create_chat_completion(request: ChatCompletionRequest):
         messages = format_messages(request.messages)
         tools = format_tools(request.tools) if request.tools else []
 
-        logger.debug(f"message {messages} , tools {tools}")
-
         # Check if stream parameter is in request
         stream = request.stream
 
