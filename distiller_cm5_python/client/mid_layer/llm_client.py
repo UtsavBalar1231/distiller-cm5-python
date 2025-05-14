@@ -674,20 +674,15 @@ class LLMClient:
                 logger.debug(
                     "Found <tool_call> tags in response content, attempting to parse."
                 )
-                parsed_calls = parse_tool_calls(full_response_content)
-                if parsed_calls:
-                    tool_calls = parsed_calls
+                tool_calls = parse_tool_calls(full_response_content)
+                if tool_calls:
                     full_response_content = full_response_content.split("<tool_call>")[
                         0
                     ].strip()
                     logger.debug(
                         f"Content updated after extracting tool calls: '{full_response_content[:100]}...'"
                     )
-                else:
-                    logger.warning(
-                        "Found <tool_call> tag in response, but failed to parse any valid calls."
-                    )
-
+                    
             result = {
                 "message": {
                     "content": full_response_content,
@@ -950,9 +945,8 @@ class LLMClient:
                 logger.warning(
                     "Stream ended. No structured tool calls found, but found '<tool_call>' tags in accumulated text. Attempting parse."
                 )
-                parsed_calls = parse_tool_calls(full_response_content)
-                if parsed_calls:
-                    final_tool_calls = parsed_calls
+                final_tool_calls = parse_tool_calls(full_response_content)
+                if final_tool_calls:
                     # Remove the tool call section from the final content
                     full_response_content = full_response_content.split("<tool_call>")[
                         0
@@ -963,9 +957,9 @@ class LLMClient:
                     # Re-dispatch the extracted tool calls if a dispatcher exists
                     if dispatcher:
                         logger.info(
-                            f"Dispatching {len(parsed_calls)} tool calls parsed from text."
+                            f"Dispatching {len(final_tool_calls)} tool calls parsed from text."
                         )
-                        for call in parsed_calls:
+                        for call in final_tool_calls:
                             # Ensure the call structure matches what MessageSchema.tool_call expects
                             if isinstance(call, dict) and "function" in call:
                                 dispatcher.dispatch(MessageSchema.tool_call(call))
