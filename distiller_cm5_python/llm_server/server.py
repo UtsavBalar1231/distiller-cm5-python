@@ -113,6 +113,7 @@ class Cache:
         cache_dir: str,
         prompts: str,
         model: Llama,
+        model_name: str,
         temperature: float = 0.0,
         capacity_bytes: int = 2 << 30,
         seed: Optional[int] = None,
@@ -120,7 +121,12 @@ class Cache:
         cache = Cache(model)
         if seed:
             model.set_seed(seed)
-        cache_context = LlamaDiskCache(cache_dir=cache_dir)
+        
+        # Create a model-specific cache directory
+        model_specific_cache_dir = os.path.join(cache_dir, model_name)
+        os.makedirs(model_specific_cache_dir, exist_ok=True) # Ensure the directory exists
+
+        cache_context = LlamaDiskCache(cache_dir=model_specific_cache_dir)
         model.set_cache(cache_context)
         prompt_tokens = cache.get_cache_key(prompts)
 
@@ -260,11 +266,13 @@ def format_prompt(messages, tools):
         f"format_prompt called with {len(messages)} messages and {len(tools) if tools else 0} tools."
     )
     rendered_prompt = template.render(messages=messages, tools=tools)
-    logger.debug(
-        "Actual prompt into llm (truncated):\n"
-        + rendered_prompt[:500]
-        + ("..." if len(rendered_prompt) > 500 else "")
-    )
+    # logger.debug(f"MODEL.chat_handler: {MODEL.chat_handler}")
+    # rendered_prompt = MODEL.chat_handler(llama=MODEL, messages=messages, tools=tools)
+    # rendered_prompt = FORMATTER(messages=messages, tools=tools).prompt
+    # logger.debug(
+    #     "Actual prompt into llm:\n"
+    #     + rendered_prompt
+    # )
     return rendered_prompt
 
 
@@ -297,6 +305,8 @@ def format_tools(tools):
 
 @app.post("/restore_cache")
 async def restore_cache(request: RestoreCacheRequest):
+    global MODEL
+    global MODEL_NAME
     try:
         # extract messages and tools
         messages = format_messages(request.messages)
@@ -307,6 +317,7 @@ async def restore_cache(request: RestoreCacheRequest):
             cache_dir=os.path.join(os.path.dirname(__file__), "cache"),
             prompts=prompt,
             model=MODEL,
+            model_name=MODEL_NAME,
             temperature=request.inference_configs["temperature"],
         )
         MODEL.load_state(cache_context)
