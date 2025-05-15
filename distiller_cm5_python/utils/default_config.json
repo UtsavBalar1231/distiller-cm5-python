@@ -2,7 +2,7 @@
   "llm_providers": {
     "llama-cpp": {
       "server_url": "http://127.0.0.1:8000",
-      "model_name": "Qwen3-1.7B-Q4_K_M.gguf",
+      "model_name": "qwen2.5-3b-instruct-q4_k_m.gguf",
       "provider_type": "llama-cpp",
       "api_key": "",
       "timeout": 150,
@@ -22,9 +22,9 @@
     },
     "openrouter": {
       "server_url": "https://openrouter.ai/api/v1",
-      "model_name": "google/gemini-2.0-flash-exp:free",
+      "model_name": "qwen/qwen3-1.7b:free",
       "provider_type": "openrouter",
-      "api_key": "sk-or-v1-*",
+      "api_key": "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",
       "timeout": 60,
       "temperature": 0.7,
       "streaming": true,
@@ -38,10 +38,10 @@
     "file_path": "mcp_client.log"
   },
   "prompts": {
-    "default_system_prompt": "You are a helpful assistant for the device called Distiller. use the tools provided to you to help the user. /no_think"
+    "default_system_prompt": "You are a helpful assistant for the device called Distiller. use the tools provided to you to help the user."
   },
   "mcp_server": {
-    "server_script_path": "distiller_cm5_python/mcp_server/tts-use_server.py"
+    "server_script_path": "distiller_cm5_python/mcp_server/wifi-mac_server.py"
   },
   "display": {
     "dark_mode": "false"
