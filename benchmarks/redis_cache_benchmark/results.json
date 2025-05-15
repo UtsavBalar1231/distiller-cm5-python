@@ -1,0 +1,901 @@
+{
+  "cache_type": "RedisSemanticCache",
+  "model_name": "qwen3-1.7b-q4_k_m.gguf",
+  "tests": [
+    {
+      "prompt": "Explain the concept of artificial intelligence in simple terms.",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.2848043441772461,
+        "memory_delta": 37429248,
+        "redis_memory_delta": 21776,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 54501376,
+          "percent": 0.10000000000000142
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.22999999999956344,
+          "system": 0.11999999999989086,
+          "process_user": 0.030000000000001137,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "Explain a concept of artificial intelligence in simple terms.",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.29343461990356445,
+        "memory_delta": 53248,
+        "redis_memory_delta": 280,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 22147072,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5599999999976717,
+          "system": 0.1000000000003638,
+          "process_user": 0.39000000000000057,
+          "process_system": 0.020000000000000462
+        }
+      }
+    },
+    {
+      "prompt": "describe the concept of artificial intelligence in simple terms.",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.2898714542388916,
+        "memory_delta": 81920,
+        "redis_memory_delta": 280,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -29908992,
+          "percent": -0.10000000000000142
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5499999999992724,
+          "system": 0.0999999999994543,
+          "process_user": 0.4399999999999977,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "What are the main components of a computer?",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.27957606315612793,
+        "memory_delta": -1019904,
+        "redis_memory_delta": 8472,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -15224832,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 30208,
+          "read_count": 0,
+          "write_count": 2
+        },
+        "cpu_cycles_delta": {
+          "user": 0.1499999999978172,
+          "system": 0.1000000000003638,
+          "process_user": 0.03999999999999204,
+          "process_system": 0.020000000000000462
+        }
+      }
+    },
+    {
+      "prompt": "What are a main components of a computer?",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.29345226287841797,
+        "memory_delta": -102400,
+        "redis_memory_delta": 4376,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -7127040,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5900000000001455,
+          "system": 0.1000000000003638,
+          "process_user": 0.45000000000000284,
+          "process_system": 0.02999999999999936
+        }
+      }
+    },
+    {
+      "prompt": "list the main components of a computer?",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.2925901412963867,
+        "memory_delta": 438272,
+        "redis_memory_delta": 8472,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 25014272,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5400000000008731,
+          "system": 0.09000000000014552,
+          "process_user": 0.4099999999999966,
+          "process_system": 0.020000000000000462
+        }
+      }
+    },
+    {
+      "prompt": "How does the Internet work?",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.27507472038269043,
+        "memory_delta": 59478016,
+        "redis_memory_delta": -14368,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 62705664,
+          "percent": 0.1999999999999993
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.25,
+          "system": 0.07000000000061846,
+          "process_user": 0.03999999999999204,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "How does a Internet work?",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.28490519523620605,
+        "memory_delta": -126976,
+        "redis_memory_delta": 992,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 30535680,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 21504,
+          "read_count": 0,
+          "write_count": 5
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5400000000008731,
+          "system": 0.0999999999994543,
+          "process_user": 0.36000000000001364,
+          "process_system": 0.020000000000000462
+        }
+      }
+    },
+    {
+      "prompt": "in what way does the internet work?",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.28252196311950684,
+        "memory_delta": -69632,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 35975168,
+          "percent": 0.10000000000000142
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5100000000020373,
+          "system": 0.11000000000058208,
+          "process_user": 0.37999999999999545,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "Describe the process of photosynthesis.",
+      "iteration": 0,
+      "metrics": {
+        "latency": 0.29651880264282227,
+        "memory_delta": -60485632,
+        "redis_memory_delta": -14368,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -49610752,
+          "percent": -0.09999999999999787
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.13000000000101863,
+          "system": 0.0999999999994543,
+          "process_user": 0.030000000000001137,
+          "process_system": 0.020000000000000462
+        }
+      }
+    },
+    {
+      "prompt": "Explain the concept of artificial intelligence in simple terms.",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.28177332878112793,
+        "memory_delta": 2129920,
+        "redis_memory_delta": 2016,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -53669888,
+          "percent": -0.10000000000000142
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.15999999999985448,
+          "system": 0.11999999999989086,
+          "process_user": 0.030000000000001137,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "Explain a concept of artificial intelligence in simple terms.",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.2859456539154053,
+        "memory_delta": 73728,
+        "redis_memory_delta": 8160,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 9465856,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 161792,
+          "read_count": 0,
+          "write_count": 9
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5799999999981083,
+          "system": 0.1000000000003638,
+          "process_user": 0.37999999999999545,
+          "process_system": 0.020000000000000462
+        }
+      }
+    },
+    {
+      "prompt": "describe the concept of artificial intelligence in simple terms.",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.276824951171875,
+        "memory_delta": -8192,
+        "redis_memory_delta": 16352,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 58654720,
+          "percent": 0.20000000000000284
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.4500000000007276,
+          "system": 0.10999999999967258,
+          "process_user": 0.30999999999998806,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "What are the main components of a computer?",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.2808241844177246,
+        "memory_delta": -1097728,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 393216,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.1499999999978172,
+          "system": 0.11000000000058208,
+          "process_user": 0.030000000000001137,
+          "process_system": 0.009999999999999787
+        }
+      }
+    },
+    {
+      "prompt": "What are a main components of a computer?",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.28751444816589355,
+        "memory_delta": 0,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 3248128,
+          "percent": 0.10000000000000142
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5200000000004366,
+          "system": 0.08000000000083674,
+          "process_user": 0.4199999999999875,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "list the main components of a computer?",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.28318047523498535,
+        "memory_delta": 94208,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -17842176,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5499999999992724,
+          "system": 0.11999999999989086,
+          "process_user": 0.39000000000000057,
+          "process_system": 0.010000000000000675
+        }
+      }
+    },
+    {
+      "prompt": "How does the Internet work?",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.27219557762145996,
+        "memory_delta": 59650048,
+        "redis_memory_delta": -1056,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 104497152,
+          "percent": 0.20000000000000284
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 40124416,
+          "read_count": 0,
+          "write_count": 319
+        },
+        "cpu_cycles_delta": {
+          "user": 0.20999999999912689,
+          "system": 0.13000000000010914,
+          "process_user": 0.04000000000000625,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "How does a Internet work?",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.2832036018371582,
+        "memory_delta": -253952,
+        "redis_memory_delta": 992,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 9797632,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5499999999992724,
+          "system": 0.14000000000032742,
+          "process_user": 0.35999999999999943,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "in what way does the internet work?",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.28598999977111816,
+        "memory_delta": 0,
+        "redis_memory_delta": 2016,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 2707456,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.47000000000116415,
+          "system": 0.06999999999970896,
+          "process_user": 0.39000000000000057,
+          "process_system": 0.010000000000000675
+        }
+      }
+    },
+    {
+      "prompt": "Describe the process of photosynthesis.",
+      "iteration": 1,
+      "metrics": {
+        "latency": 0.2804548740386963,
+        "memory_delta": -60555264,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -52387840,
+          "percent": -0.10000000000000142
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.15999999999985448,
+          "system": 0.1500000000005457,
+          "process_user": 0.04000000000000625,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "Explain the concept of artificial intelligence in simple terms.",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.2846853733062744,
+        "memory_delta": 2105344,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 17145856,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.1900000000023283,
+          "system": 0.1000000000003638,
+          "process_user": 0.03999999999999204,
+          "process_system": 0.009999999999999787
+        }
+      }
+    },
+    {
+      "prompt": "Explain a concept of artificial intelligence in simple terms.",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.30022573471069336,
+        "memory_delta": 131072,
+        "redis_memory_delta": 4064,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 14872576,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 24576,
+          "read_count": 0,
+          "write_count": 1
+        },
+        "cpu_cycles_delta": {
+          "user": 0.6199999999989814,
+          "system": 0.14000000000032742,
+          "process_user": 0.45999999999999375,
+          "process_system": 0.03000000000000025
+        }
+      }
+    },
+    {
+      "prompt": "describe the concept of artificial intelligence in simple terms.",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.2828805446624756,
+        "memory_delta": 0,
+        "redis_memory_delta": 8160,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 3629056,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.43000000000029104,
+          "system": 0.07999999999992724,
+          "process_user": 0.3299999999999983,
+          "process_system": 0.020000000000000462
+        }
+      }
+    },
+    {
+      "prompt": "What are the main components of a computer?",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.29192376136779785,
+        "memory_delta": -1073152,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -44421120,
+          "percent": -0.09999999999999787
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.1499999999978172,
+          "system": 0.14000000000032742,
+          "process_user": 0.030000000000001137,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "What are a main components of a computer?",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.2879018783569336,
+        "memory_delta": -233472,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 27017216,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5099999999983993,
+          "system": 0.09000000000014552,
+          "process_user": 0.4200000000000017,
+          "process_system": 0.020000000000000462
+        }
+      }
+    },
+    {
+      "prompt": "list the main components of a computer?",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.2878260612487793,
+        "memory_delta": 151552,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 18763776,
+          "percent": 0.09999999999999787
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5499999999992724,
+          "system": 0.10999999999967258,
+          "process_user": 0.4099999999999966,
+          "process_system": 0.009999999999999787
+        }
+      }
+    },
+    {
+      "prompt": "How does the Internet work?",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.28903722763061523,
+        "memory_delta": 59420672,
+        "redis_memory_delta": -1056,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 50499584,
+          "percent": 0.10000000000000142
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.1500000000014552,
+          "system": 0.10999999999967258,
+          "process_user": 0.030000000000001137,
+          "process_system": 0.009999999999999787
+        }
+      }
+    },
+    {
+      "prompt": "How does a Internet work?",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.2891867160797119,
+        "memory_delta": 143360,
+        "redis_memory_delta": -15392,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -16633856,
+          "percent": -0.10000000000000142
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 540160,
+          "read_count": 0,
+          "write_count": 77
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5399999999972351,
+          "system": 0.13000000000010914,
+          "process_user": 0.3999999999999915,
+          "process_system": 0.020000000000000462
+        }
+      }
+    },
+    {
+      "prompt": "in what way does the internet work?",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.28436875343322754,
+        "memory_delta": 8192,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": 29552640,
+          "percent": 0.10000000000000142
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.5400000000008731,
+          "system": 0.06999999999970896,
+          "process_user": 0.4099999999999966,
+          "process_system": 0.019999999999999574
+        }
+      }
+    },
+    {
+      "prompt": "Describe the process of photosynthesis.",
+      "iteration": 2,
+      "metrics": {
+        "latency": 0.2611405849456787,
+        "memory_delta": -60551168,
+        "redis_memory_delta": -32,
+        "cpu_percent": 0.0,
+        "is_cache_hit": true,
+        "memory_pressure_delta": {
+          "used": -33763328,
+          "percent": 0.0
+        },
+        "io_pressure_delta": {
+          "read_bytes": 0,
+          "write_bytes": 0,
+          "read_count": 0,
+          "write_count": 0
+        },
+        "cpu_cycles_delta": {
+          "user": 0.10000000000218279,
+          "system": 0.11999999999989086,
+          "process_user": 0.04000000000000625,
+          "process_system": 0.020000000000000462
+        }
+      }
+    }
+  ],
+  "summary": {
+    "cache_hit_ratio": 1.0,
+    "semantic_caching_effectiveness": 1.0,
+    "latency": {
+      "cache_hit": {
+        "mean": 0.2849944432576497,
+        "min": 0.2611405849456787,
+        "max": 0.30022573471069336
+      },
+      "cache_miss": {
+        "mean": null,
+        "min": null,
+        "max": null
+      }
+    },
+    "memory_usage": {
+      "cache_hit": {
+        "mean": 1193710.9333333333
+      },
+      "cache_miss": {
+        "mean": null
+      }
+    },
+    "redis_memory_usage": {
+      "cache_hit": {
+        "mean": 1327.2
+      },
+      "cache_miss": {
+        "mean": null
+      }
+    },
+    "memory_pressure": {
+      "cache_hit": {
+        "mean": 8684475.733333332
+      },
+      "cache_miss": {
+        "mean": null
+      }
+    },
+    "io_pressure": {
+      "cache_hit": {
+        "mean": 1363421.8666666667
+      },
+      "cache_miss": {
+        "mean": null
+      }
+    },
+    "cpu_cycles": {
+      "cache_hit": {
+        "mean": 0.2509999999999986
+      },
+      "cache_miss": {
+        "mean": null
+      }
+    },
+    "initial_redis_memory": 1337176,
+    "final_redis_memory": 169176632,
+    "redis_memory_growth": 167839456,
+    "redis_info": {
+      "used_memory_human": "161.34M",
+      "maxmemory_human": "2.00G",
+      "maxmemory_policy": "allkeys-lru"
+    },
+    "cache_entries": 6
+  },
+  "setup_time": 4.298278093338013,
+  "setup_memory_delta": 2327351296,
+  "setup_io_delta": {
+    "read_bytes": 8192,
+    "write_bytes": 860672,
+    "read_count": 2,
+    "write_count": 124
+  },
+  "setup_cpu_delta": {
+    "user": 2.209999999999127,
+    "system": 1.139999999999418,
+    "idle": 113.23999999999069
+  },
+  "redis_setup": {
+    "used_memory_bytes": 1308344,
+    "used_memory_human": "1.25M",
+    "maxmemory_bytes": 2147483648,
+    "maxmemory_human": "2.00G",
+    "maxmemory_policy": "allkeys-lru"
+  }
+}

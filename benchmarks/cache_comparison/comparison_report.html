@@ -1,0 +1,124 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Cache Benchmark Comparison</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                h1 { color: #333; }
+                h2 { color: #555; }
+                table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #f2f2f2; }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+                .positive { color: green; }
+                .negative { color: red; }
+                .img-container { margin: 20px 0; }
+                img { max-width: 100%; height: auto; }
+            </style>
+        </head>
+        <body>
+            <h1>Cache Benchmark Comparison</h1>
+            <p>Comparing performance between LlamaDiskCache and Redis semantic cache.</p>
+            
+            <h2>Cache Hit Ratio</h2>
+            <table>
+                <tr>
+                    <th>Cache Type</th>
+                    <th>Hit Ratio</th>
+                    <th>Difference</th>
+                </tr>
+                <tr>
+                    <td>LlamaDiskCache</td>
+                    <td>100.00%</td>
+                    <td rowspan="2" class="negative">0.00%</td>
+                </tr>
+                <tr>
+                    <td>Redis Cache</td>
+                    <td>100.00%</td>
+                </tr>
+            </table>
+            
+            <h2>Latency (seconds)</h2>
+            <table>
+                <tr>
+                    <th>Cache Type</th>
+                    <th>Cache Hit</th>
+                    <th>Cache Miss</th>
+                    <th>Hit/Miss Difference</th>
+                </tr>
+                <tr>
+                    <td>LlamaDiskCache</td>
+                    <td>2.1009</td>
+                    <td>0.0000</td>
+                    <td>-2.1009</td>
+                </tr>
+                <tr>
+                    <td>Redis Cache</td>
+                    <td>0.2850</td>
+                    <td>0.0000</td>
+                    <td>-0.2850</td>
+                </tr>
+                <tr>
+                    <td>Difference</td>
+                    <td class="positive">-1.8159</td>
+                    <td class="positive">0.0000</td>
+                    <td></td>
+                </tr>
+            </table>
+            
+            <h2>Memory Usage</h2>
+            <table>
+                <tr>
+                    <th>Cache Type</th>
+                    <th>Size (MB)</th>
+                    <th>Difference</th>
+                </tr>
+                <tr>
+                    <td>LlamaDiskCache</td>
+                    <td>38.03</td>
+                    <td rowspan="2" class="negative">123.31 MB (324.25%)</td>
+                </tr>
+                <tr>
+                    <td>Redis Cache</td>
+                    <td>161.34</td>
+                </tr>
+            </table>
+            
+            <h2>Resource Pressure Metrics</h2>
+            <table>
+                <tr>
+                    <th>Metric</th>
+                    <th>LlamaDiskCache</th>
+                    <th>Redis Cache</th>
+                    <th>Difference</th>
+                </tr>
+                <tr>
+                    <td>Memory Pressure (MB)</td>
+                    <td>12.87</td>
+                    <td>8.28</td>
+                    <td class="positive">-4.58 (-35.63%)</td>
+                </tr>
+                <tr>
+                    <td>IO Pressure (MB)</td>
+                    <td>0.14</td>
+                    <td>1.30</td>
+                    <td class="negative">1.16 (842.74%)</td>
+                </tr>
+                <tr>
+                    <td>CPU Cycles (s)</td>
+                    <td>11.7683</td>
+                    <td>0.2510</td>
+                    <td class="positive">-11.5173 (-97.87%)</td>
+                </tr>
+            </table>
+            
+            <h2>Visualization</h2>
+            <div class="img-container">
+                <img src="cache_comparison.png" alt="Cache Comparison Chart">
+            </div>
+            
+            <p><em>Generated on 2025-05-15 23:42:26</em></p>
+        </body>
+        </html>
+        

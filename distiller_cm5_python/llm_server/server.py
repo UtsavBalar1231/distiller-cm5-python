@@ -7,7 +7,7 @@ import logging
 import json
 import os
 import sys
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Literal, Union
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
@@ -22,6 +22,13 @@ import re
 # Import the centralized logging setup
 from distiller_cm5_python.utils.logger import setup_logging
 
+# Import Redis semantic cache
+try:
+    from distiller_cm5_python.llm_server.redis_semantic_cache import RedisSemanticCache
+    REDIS_CACHE_AVAILABLE = True
+except ImportError:
+    REDIS_CACHE_AVAILABLE = False
+
 # --- Logging setup will be done in main() after parsing args ---
 
 # Get the logger for this module
@@ -35,6 +42,7 @@ app = FastAPI(
 
 MODEL_NAME = None
 MODEL = None
+CACHE_TYPE = "disk"  # Options: "disk", "redis", "none"
 
 
 # Define request and response models
@@ -100,12 +108,44 @@ class RestoreCacheRequest(BaseModel):
     inference_configs: Optional[Dict[str, Any]] = dict()
 
 
+class CacheConfig(BaseModel):
+    type: Literal["disk", "redis", "none"]
+    redis_host: Optional[str] = "localhost"
+    redis_port: Optional[int] = 6379
+    redis_db: Optional[int] = 0
+    redis_password: Optional[str] = None
+    similarity_threshold: Optional[float] = 0.85
+    capacity_mb: Optional[int] = 2048
+    ttl: Optional[int] = 86400  # 24 hours by default
+
+
 class Cache:
-    def __init__(self, model: Llama):
+    """Cache manager that can use either disk-based or Redis-based semantic caching"""
+    
+    def __init__(self, model: Llama, cache_type: str = "disk"):
+        """
+        Initialize the cache manager.
+        
+        Args:
+            model: Llama model instance
+            cache_type: Type of cache to use ("disk", "redis", or "none")
+        """
         self.model = model
+        self.cache_type = cache_type.lower()
         self.cache_context = None
+        
+        if self.cache_type == "none":
+            logger.info("Caching disabled")
+            return
+        
+        if self.cache_type not in ["disk", "redis"]:
+            logger.warning(f"Unknown cache type '{cache_type}', defaulting to disk")
+            self.cache_type = "disk"
+            
+        logger.info(f"Using {self.cache_type} cache")
 
     def get_cache_key(self, prompt: str):
+        """Get cache key tokens for a prompt"""
         return self.model.tokenize(prompt.encode("utf-8"))
 
     @staticmethod
@@ -117,24 +157,99 @@ class Cache:
         temperature: float = 0.0,
         capacity_bytes: int = 2 << 30,
         seed: Optional[int] = None,
+        cache_type: str = "disk",
+        redis_config: Optional[Dict[str, Any]] = None
     ):
-        cache = Cache(model)
+        """
+        Build and initialize cache for the model.
+        
+        Args:
+            cache_dir: Directory for disk cache
+            prompts: Prompt text
+            model: Llama model instance
+            model_name: Name of the model
+            temperature: Sampling temperature
+            capacity_bytes: Cache capacity in bytes (for disk cache)
+            seed: Random seed for reproducibility
+            cache_type: Type of cache ("disk", "redis", or "none")
+            redis_config: Configuration for Redis cache
+            
+        Returns:
+            Cache state or None if caching is disabled
+        """
+        cache = Cache(model, cache_type)
+        
         if seed:
             model.set_seed(seed)
         
-        # Create a model-specific cache directory
-        model_specific_cache_dir = os.path.join(cache_dir, model_name)
-        os.makedirs(model_specific_cache_dir, exist_ok=True) # Ensure the directory exists
+        if cache_type == "none":
+            # Run the inference but don't save cache
+            model.reset()
+            _ = model(
+                prompts,
+                max_tokens=1,
+                temperature=temperature,
+                echo=False,
+            )
+            return model.save_state()
+            
+        elif cache_type == "disk":
+            # Create a model-specific cache directory
+            model_specific_cache_dir = os.path.join(cache_dir, model_name)
+            os.makedirs(model_specific_cache_dir, exist_ok=True)
 
-        cache_context = LlamaDiskCache(cache_dir=model_specific_cache_dir)
-        model.set_cache(cache_context)
-        prompt_tokens = cache.get_cache_key(prompts)
+            # Set up disk cache
+            cache_context = LlamaDiskCache(cache_dir=model_specific_cache_dir)
+            model.set_cache(cache_context)
+            prompt_tokens = cache.get_cache_key(prompts)
 
-        try:
-            cached_state = cache_context[prompt_tokens]
-            return cached_state
-        except Exception as e:
-            # cache non exist
+            try:
+                cached_state = cache_context[prompt_tokens]
+                return cached_state
+            except Exception as e:
+                # Cache doesn't exist
+                model.reset()
+                _ = model(
+                    prompts,
+                    max_tokens=1,  # Minimal tokens for cache creation
+                    temperature=temperature,
+                    echo=False,
+                )
+                # Save the state to cache
+                cache_context[prompt_tokens] = model.save_state()
+                return cache_context[prompt_tokens]
+                
+        elif cache_type == "redis":
+            if not REDIS_CACHE_AVAILABLE:
+                logger.error("Redis cache requested but not available. Falling back to disk cache.")
+                return Cache.build_cache(
+                    cache_dir, prompts, model, model_name, temperature, capacity_bytes, seed, "disk"
+                )
+            
+            # Default Redis config if none provided
+            redis_config = redis_config or {}
+            
+            # Set up Redis semantic cache
+            cache_context = RedisSemanticCache(
+                redis_host=redis_config.get("redis_host", "localhost"),
+                redis_port=redis_config.get("redis_port", 6379),
+                redis_db=redis_config.get("redis_db", 0),
+                redis_password=redis_config.get("redis_password"),
+                model_name=model_name,
+                similarity_threshold=redis_config.get("similarity_threshold", 0.85),
+                capacity_mb=redis_config.get("capacity_mb", 2048),
+                ttl=redis_config.get("ttl", 86400),
+            )
+            
+            # Get tokens for exact match
+            prompt_tokens = cache.get_cache_key(prompts)
+            
+            # Try to load from cache (both exact and semantic matches)
+            if cache_context.load_state(model, prompts, prompt_tokens):
+                # Cache hit, return the loaded state
+                return model.save_state()
+            
+            # Cache miss, run inference and save to cache
             model.reset()
             _ = model(
                 prompts,
@@ -142,9 +257,12 @@ class Cache:
                 temperature=temperature,
                 echo=False,
             )
-            # Save the state to cache
-            cache_context[prompt_tokens] = model.save_state()
-            return cache_context[prompt_tokens]
+            
+            # Save state to cache
+            cache_context.save_state(model, prompts, prompt_tokens)
+            
+            # Return the state
+            return model.save_state()
 
 
 @app.get("/")
@@ -165,7 +283,7 @@ async def health_check():
             }
         return {
             "status": "ok",
-            "message": f"LLM Server is healthy, using model: {MODEL_NAME}",
+            "message": f"LLM Server is healthy, using model: {MODEL_NAME}, cache: {CACHE_TYPE}",
         }
     except Exception as e:
         logger.error(f"Health check failed: {e}")
@@ -195,6 +313,48 @@ async def set_model(request: SetModel):
     except Exception as e:
         logger.error(f"Error setting model: {e}")
         raise HTTPException(status_code=500, detail=f"Error set models: {str(e)}")
+
+
+@app.post("/setCacheType")
+async def set_cache_type(request: CacheConfig):
+    """Set or update the cache configuration"""
+    global CACHE_TYPE
+    try:
+        old_cache_type = CACHE_TYPE
+        CACHE_TYPE = request.type
+        
+        if request.type == "redis" and not REDIS_CACHE_AVAILABLE:
+            logger.warning("Redis cache requested but dependencies not available. Please install 'redis' and 'sentence_transformers'")
+            return {
+                "status": "warning", 
+                "message": "Redis cache requested but dependencies not available. Using disk cache instead.",
+                "cache_type": "disk"
+            }
+        
+        # Store the Redis config if provided
+        redis_config = {
+            "redis_host": request.redis_host,
+            "redis_port": request.redis_port,
+            "redis_db": request.redis_db,
+            "redis_password": request.redis_password,
+            "similarity_threshold": request.similarity_threshold,
+            "capacity_mb": request.capacity_mb,
+            "ttl": request.ttl,
+        }
+        
+        # Save Redis config to app state
+        app.state.redis_config = redis_config
+        
+        logger.info(f"Cache type changed from {old_cache_type} to {CACHE_TYPE}")
+        
+        return {
+            "status": "ok", 
+            "message": f"Cache type is set to {CACHE_TYPE}", 
+            "cache_type": CACHE_TYPE
+        }
+    except Exception as e:
+        logger.error(f"Error setting cache type: {e}")
+        raise HTTPException(status_code=500, detail=f"Error setting cache type: {str(e)}")
 
 
 def load_model(model_name, load_model_configs: dict[str, Any]):
@@ -307,21 +467,34 @@ def format_tools(tools):
 async def restore_cache(request: RestoreCacheRequest):
     global MODEL
     global MODEL_NAME
+    global CACHE_TYPE
+    
     try:
         # extract messages and tools
         messages = format_messages(request.messages)
         tools = format_tools(request.tools)
         # handle cache
         prompt = format_prompt(messages, tools)
+        
+        # Get Redis config if available
+        redis_config = getattr(app.state, "redis_config", {})
+        
         cache_context = Cache.build_cache(
             cache_dir=os.path.join(os.path.dirname(__file__), "cache"),
             prompts=prompt,
             model=MODEL,
             model_name=MODEL_NAME,
             temperature=request.inference_configs["temperature"],
+            cache_type=CACHE_TYPE,
+            redis_config=redis_config
         )
-        MODEL.load_state(cache_context)
-        return {"status": "ok", "message": "cache is restored"}
+        
+        if cache_context:
+            MODEL.load_state(cache_context)
+            return {"status": "ok", "message": f"cache is restored using {CACHE_TYPE} cache"}
+        else:
+            return {"status": "warning", "message": "no cache was restored, caching might be disabled"}
+            
     except Exception as e:
         logger.error(f"Error restoring cache: {e}")
         raise HTTPException(status_code=500, detail=f"Error restoring cache: {str(e)}")
@@ -410,6 +583,26 @@ def main():
         choices=["debug", "info", "warning", "error", "critical"],
         help="Log level",
     )
+    parser.add_argument(
+        "--cache-type",
+        type=str,
+        default="disk",
+        choices=["disk", "redis", "none"],
+        help="Cache type to use",
+    )
+    parser.add_argument(
+        "--redis-host",
+        type=str,
+        default="localhost",
+        help="Redis host when using Redis cache",
+    )
+    parser.add_argument(
+        "--redis-port",
+        type=int,
+        default=6379,
+        help="Redis port when using Redis cache",
+    )
+    
     args = parser.parse_args()
 
     # --- Setup Logging ---
@@ -419,6 +612,27 @@ def main():
     setup_logging(log_level=log_level_int, stream=sys.stdout)
     # --- Logging is now configured ---
     logger.info(f"Logging level set to: {args.log_level.upper()}")
+    
+    # Set cache type
+    global CACHE_TYPE
+    CACHE_TYPE = args.cache_type
+    
+    if CACHE_TYPE == "redis" and not REDIS_CACHE_AVAILABLE:
+        logger.warning("Redis cache selected but dependencies not available. Falling back to disk cache")
+        CACHE_TYPE = "disk"
+    
+    logger.info(f"Cache type set to: {CACHE_TYPE}")
+    
+    # Store Redis config in app state for later use
+    app.state.redis_config = {
+        "redis_host": args.redis_host,
+        "redis_port": args.redis_port,
+        "redis_db": 0,
+        "redis_password": None,
+        "similarity_threshold": 0.85,
+        "capacity_mb": 2048,
+        "ttl": 86400,
+    }
 
     # Set default model if provided via command line, otherwise use the one from request
     global MODEL_NAME

@@ -1,0 +1,168 @@
+{
+  "llama_disk_cache": {
+    "name": "LlamaDiskCache",
+    "summary": {
+      "cache_hit_ratio": 1.0,
+      "latency": {
+        "cache_hit": {
+          "mean": 2.100914796193441,
+          "min": 1.8309228420257568,
+          "max": 2.2388722896575928
+        },
+        "cache_miss": {
+          "mean": null,
+          "min": null,
+          "max": null
+        }
+      },
+      "memory_usage": {
+        "cache_hit": {
+          "mean": 1234670.9333333333
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "disk_usage": {
+        "cache_hit": {
+          "mean": 41200
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "memory_pressure": {
+        "cache_hit": {
+          "mean": 13490995.2
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "io_pressure": {
+        "cache_hit": {
+          "mean": 144622.93333333332
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "cpu_cycles": {
+        "cache_hit": {
+          "mean": 11.76833333333333
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "final_cache_size": 39877052,
+      "cache_growth": 39877052
+    }
+  },
+  "redis_cache": {
+    "name": "Redis Semantic Cache",
+    "summary": {
+      "cache_hit_ratio": 1.0,
+      "semantic_caching_effectiveness": 1.0,
+      "latency": {
+        "cache_hit": {
+          "mean": 0.2849944432576497,
+          "min": 0.2611405849456787,
+          "max": 0.30022573471069336
+        },
+        "cache_miss": {
+          "mean": null,
+          "min": null,
+          "max": null
+        }
+      },
+      "memory_usage": {
+        "cache_hit": {
+          "mean": 1193710.9333333333
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "redis_memory_usage": {
+        "cache_hit": {
+          "mean": 1327.2
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "memory_pressure": {
+        "cache_hit": {
+          "mean": 8684475.733333332
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "io_pressure": {
+        "cache_hit": {
+          "mean": 1363421.8666666667
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "cpu_cycles": {
+        "cache_hit": {
+          "mean": 0.2509999999999986
+        },
+        "cache_miss": {
+          "mean": null
+        }
+      },
+      "initial_redis_memory": 1337176,
+      "final_redis_memory": 169176632,
+      "redis_memory_growth": 167839456,
+      "redis_info": {
+        "used_memory_human": "161.34M",
+        "maxmemory_human": "2.00G",
+        "maxmemory_policy": "allkeys-lru"
+      },
+      "cache_entries": 6
+    }
+  },
+  "comparative_metrics": {
+    "cache_hit_ratio": {
+      "llama_disk_cache": 1.0,
+      "redis_cache": 1.0,
+      "delta": 0.0,
+      "delta_percent": 0.0
+    },
+    "hit_latency": {
+      "llama_disk_cache": 2.100914796193441,
+      "redis_cache": 0.2849944432576497,
+      "delta": -1.8159203529357912,
+      "delta_percent": -86.4347452940967
+    },
+    "memory_usage": {
+      "llama_disk_cache": 39877052,
+      "redis_cache": 169176632,
+      "delta": 129299580,
+      "delta_percent": 324.2455836504664
+    },
+    "memory_pressure": {
+      "llama_disk_cache": 13490995.2,
+      "redis_cache": 8684475.733333332,
+      "delta": -4806519.466666667,
+      "delta_percent": -35.6276123103703
+    },
+    "io_pressure": {
+      "llama_disk_cache": 144622.93333333332,
+      "redis_cache": 1363421.8666666667,
+      "delta": 1218798.9333333333,
+      "delta_percent": 842.7425064904414
+    },
+    "cpu_cycles": {
+      "llama_disk_cache": 11.76833333333333,
+      "redis_cache": 0.2509999999999986,
+      "delta": -11.517333333333331,
+      "delta_percent": -97.86715762639854
+    }
+  }
+}

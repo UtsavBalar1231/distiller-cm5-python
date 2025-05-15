@@ -11,8 +11,53 @@ The framework consists of several key components:
 *   **MCP Server (`distiller_cm5_python/mcp_server/`)**: Contains example MCP server implementations that expose specific functionalities (like Text-to-Speech or WiFi control) as tools callable by the MCP client via the protocol. (See `mcp_server/README.md` for details)
 *   **Utilities (`distiller_cm5_python/utils/`)**: Shared modules for configuration management (`config.py`), logging (`logger.py`), and custom exceptions (`distiller_exception.py`). (See `utils/README.md` for details)
 *   **SDK (`distiller_cm5_sdk`)**: An external, installable package containing reusable components like Whisper (ASR) and Piper (TTS) wrappers. Used by components like the client UI (`client/ui/App.py`) and the talk server (`mcp_server/talk_server.py`). See [Pamir-AI/distiller-cm5-sdk](https://github.com/Pamir-AI/distiller-cm5-sdk/tree/main) for details.
+*   **Benchmarks (`benchmarks/`)**: Contains tools for benchmarking and comparing different caching implementations, measuring performance and resource usage metrics like memory pressure, I/O pressure, and CPU cycles. (See `benchmarks/README.md` for details)
 
 The primary user entry point is `main.py` in the project root.
+
+## Redis Semantic Cache
+
+The LLM server now features an optional Redis-based semantic cache that provides:
+
+- Vector similarity search for semantic matching of prompts with similar meanings
+- Improved cache hit rates compared to traditional exact-match caching
+- Resource management with configurable memory limits, TTL, and similarity thresholds
+
+To use the Redis semantic cache:
+
+1. Install Redis server on your system:
+   ```bash
+   # For Debian/Ubuntu
+   sudo apt install redis-server
+   
+   # For Arch Linux
+   sudo pacman -S redis
+   
+   # For macOS
+   brew install redis
+   ```
+
+2. Start the Redis server:
+   ```bash
+   redis-server
+   ```
+
+3. Configure the LLM server to use Redis cache via the `/setCacheType` endpoint:
+   ```bash
+   curl -X POST "http://localhost:8000/setCacheType" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "type": "redis",
+       "redis_host": "localhost",
+       "redis_port": 6379,
+       "redis_db": 0,
+       "similarity_threshold": 0.85,
+       "capacity_mb": 2048,
+       "ttl": 86400
+     }'
+   ```
+
+You can also use the benchmark scripts in the `benchmarks/` directory to evaluate the performance of different caching strategies for your specific use case. See `benchmarks/README.md` for detailed instructions on running and analyzing cache performance benchmarks.
 
 ## Installation and Setup
 
