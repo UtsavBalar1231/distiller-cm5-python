@@ -15,6 +15,31 @@ from typing import Optional, List, Dict, Any
 logger = logging.getLogger(__name__)
 
 
+def transform_tool_arguments(arguments_input: Any, tool_name: Optional[str] = "UnknownTool") -> Dict[str, Any]:
+    """
+    Parses the 'arguments' field of a tool call.
+    Expects arguments_input to be a dictionary or a JSON string that parses to a dictionary.
+    Raises ValueError for missing, null, invalid types, or parsing failures.
+    """
+    if arguments_input is None:
+        raise ValueError(f"Tool arguments field for '{tool_name}' is missing or null.")
+    elif isinstance(arguments_input, dict):
+        return arguments_input
+    elif isinstance(arguments_input, str):
+        try:
+            parsed_args = json5.loads(arguments_input)
+            if not isinstance(parsed_args, dict):
+                raise ValueError(f"Tool arguments string for '{tool_name}' did not parse to a dictionary. Parsed to type: {type(parsed_args).__name__}.")
+            return parsed_args
+        except Exception as e: # Catch broader Exception as json5.loads can raise more than just ValueError
+            logger.warning(f"Failed to parse arguments string as JSON dictionary for tool '{tool_name}': {e}. Arguments string snippet: '{str(arguments_input)[:200]}...'")
+            raise ValueError(f"Tool arguments for '{tool_name}' is a string but not valid JSON for a dictionary: {e}")
+    else:
+        raise ValueError(
+            f"Tool arguments field for '{tool_name}' has an unexpected type: {type(arguments_input).__name__}. Expected dict or JSON string."
+        )
+
+
 def normalize_tool_call_json(tool_call_str: str) -> str:
     """Attempt to fix common JSON issues in tool call strings."""
     if not isinstance(tool_call_str, str):
@@ -116,48 +141,30 @@ def parse_tool_calls(text: str) -> List[Dict[str, Any]]:
             if (
                 not isinstance(tool_call_data, dict)
                 or "name" not in tool_call_data
-                # "arguments" check will be handled more robustly below
+                # "arguments" check will be handled by transform_tool_arguments
             ):
                 raise ValueError(
                     "Parsed JSON missing required 'name' field or is not a dictionary."
                 )
-
+            
+            tool_name = tool_call_data['name']
             arguments_field = tool_call_data.get("arguments")
-            parsed_args_dict: Dict[str, Any] = {}
+            
+            # Use the new helper function to parse/validate arguments
+            parsed_args_dict = transform_tool_arguments(arguments_field, tool_name)
 
-            logger.info(f"Parsed arguments field: {arguments_field}")
+            logger.info(f"Successfully parsed arguments for tool '{tool_name}'.")
 
-            if isinstance(arguments_field, dict):
-                parsed_args_dict = arguments_field
-            elif isinstance(arguments_field, str):
-                try:
-                    parsed_args_dict = json5.loads(arguments_field)
-                    if not isinstance(parsed_args_dict, dict):
-                        # If the string parsed to something other than a dict (e.g. a list or a primitive)
-                        raise ValueError("Tool arguments string did not parse to a dictionary.")
-                except ValueError as e:
-                    # Log the specific error for debugging, then re-raise to be caught by outer handler
-                    logger.warning(f"Failed to parse arguments string as JSON dictionary for tool '{tool_call_data.get('name')}': {e}. Arguments: '{arguments_field[:100]}...'")
-                    raise ValueError(f"Tool arguments field is a string but not valid JSON for a dictionary: {e}")
-            elif arguments_field is None:
-                 # If "arguments" is missing, treat as an error to be caught by outer handler
-                raise ValueError("Tool arguments field is missing.")
-            else:
-                # If "arguments" is present but not a dict or string
-                raise ValueError(
-                    f"Tool arguments field has an unexpected type: {type(arguments_field).__name__}."
-                )
-                arguments_str = str(arguments_value)
 
             # Format into OpenAI-compatible structure
             # Generate a unique-ish ID based on index or content hash? For now, use name + index.
-            tool_call_id = f"call_{tool_call_data['name']}_{i}"
+            tool_call_id = f"call_{tool_name}_{i}"
 
             formatted_tool_call = {
                 "id": tool_call_id,
                 "type": "function",  # Assuming all are function calls
                 "function": {
-                    "name": tool_call_data["name"],
+                    "name": tool_name,
                     "arguments": parsed_args_dict, # Use the parsed dictionary
                 },
             }
@@ -169,9 +176,9 @@ def parse_tool_calls(text: str) -> List[Dict[str, Any]]:
         except ValueError as e:
             error_message = str(e)
             log_prefix = "parse_tool_calls: Failed JSON parsing for tool call"
-            if "missing required 'name' or 'arguments' fields" in error_message:
+            if "missing required 'name' field or is not a dictionary" in error_message: # Adjusted condition slightly
                 log_prefix = "parse_tool_calls: Invalid structure for tool call"
-            elif "Tool arguments field" in error_message: # Specific check for our new argument errors
+            elif "Tool arguments field" in error_message or "Tool arguments for" in error_message: # Catch new errors
                 log_prefix = "parse_tool_calls: Invalid arguments for tool call"
             
             logger.error(
