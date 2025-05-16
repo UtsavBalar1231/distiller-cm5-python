@@ -305,7 +305,7 @@ class MessageProcessor:
                 {
                     "id": tool_call_id,
                     "type": "function", # Standard type for tool calls
-                    "function": {"name": tool_name, "arguments": tool_args_raw},
+                    "function": {"name": tool_name, "arguments": json.dumps(tool_args_raw) if isinstance(tool_args_raw, dict) else tool_args_raw},
                 }
             )
 
