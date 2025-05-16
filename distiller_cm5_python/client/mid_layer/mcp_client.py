@@ -418,7 +418,6 @@ class MCPClient:
                 try:
                     if use_stream:
                         # Stream and dispatch events via LLM client
-                        logger.debug(f"Streaming response messages: {messages}")
                         response = await self.llm_provider.get_chat_completion_streaming_response(
                             messages=messages,
                             tools=self.available_tools,
