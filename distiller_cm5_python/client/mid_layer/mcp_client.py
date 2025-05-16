@@ -295,11 +295,11 @@ class MCPClient:
 
                 # Dispatch an error event for the parsing failure
                 action_event = ActionEvent(
-                    type=EventType.ERROR,
-                    content=tool_result_content, # Use the detailed error message
+                    type=EventType.ACTION,
+                    content=tool_result_content, 
                     status=StatusType.FAILED,
                     tool_name=tool_name, # This will be "__llm_tool_parse_error__"
-                    tool_args=error_details_dict if error_details_dict else {"raw_args": raw_error_args_str}, # Parsed details or raw string
+                    tool_args=error_details_dict,
                     data={"tool_call": tool_call, "error": "LLMToolParseError"},
                 )
                 self.dispatcher.dispatch(action_event)
@@ -418,6 +418,7 @@ class MCPClient:
                 try:
                     if use_stream:
                         # Stream and dispatch events via LLM client
+                        logger.debug(f"Streaming response messages: {messages}")
                         response = await self.llm_provider.get_chat_completion_streaming_response(
                             messages=messages,
                             tools=self.available_tools,
