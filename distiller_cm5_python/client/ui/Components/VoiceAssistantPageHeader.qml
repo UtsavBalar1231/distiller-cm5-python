@@ -8,7 +8,6 @@ Rectangle {
     property string serverName: "NO SERVER"
     property string statusText: "Ready"
     property bool isConnected: false
-    property bool showStatusText: false
     property bool wifiConnected: false
     property string ipAddress: ""
     property string wifiName: ""
